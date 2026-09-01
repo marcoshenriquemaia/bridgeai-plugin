@@ -1,0 +1,15 @@
+{
+  "name": "marcos-maia",
+  "owner": {
+    "name": "Marcos Maia",
+    "url": "https://github.com/marcoshenriquemaia"
+  },
+  "description": "Plugins de Marcos Maia para Claude Code",
+  "plugins": [
+    {
+      "name": "bridgeai",
+      "source": "./",
+      "description": "Infraestrutura pronta e visível para o Claude, com custo na mesa antes de gastar"
+    }
+  ]
+}
