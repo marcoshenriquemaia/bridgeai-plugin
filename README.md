@@ -104,7 +104,7 @@ desde a primeira mensagem. Se a resposta for "só quando o assunto aparecer", é
 
 ## Estado
 
-Versão 0.1.0, em desenvolvimento. O servidor MCP em `https://mcp.bridgeai.app` ainda
+Versão 0.1.0, em desenvolvimento. O servidor MCP em `https://mcp.bridgeaibrasil.com.br` ainda
 não está no ar — os nomes de ferramenta em `rules/platform.md` são o contrato que
 o servidor precisa cumprir.
 

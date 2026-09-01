@@ -2,7 +2,7 @@
   "mcpServers": {
     "bridgeai": {
       "type": "http",
-      "url": "https://mcp.bridgeai.app"
+      "url": "https://mcp.bridgeaibrasil.com.br"
     }
   }
 }

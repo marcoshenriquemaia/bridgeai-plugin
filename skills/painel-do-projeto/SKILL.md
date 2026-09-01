@@ -21,7 +21,7 @@ limitação de *superfície*, e é o que impede que um painel gerado automaticam
 vire uma porta aberta para o banco de um cliente.
 
 Fluxo: leia o schema com `describe_app`, monte o manifesto, chame
-`publicar_dashboard`. Sai em `<app>-admin.bridgeai.app`, com login e papéis próprios,
+`publicar_dashboard`. Sai em `<app>-admin.bridgeaibrasil.com.br`, com login e papéis próprios,
 separado da autenticação do app.
 
 ## Comece pelo que ele falou

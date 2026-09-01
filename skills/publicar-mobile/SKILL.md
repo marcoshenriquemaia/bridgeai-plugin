@@ -51,7 +51,7 @@ linhas:
 ## A página de teste
 
 Não gere um QR novo a cada rodada e não mande arquivo por mensagem. Depois de
-construir, chame `registrar_build` — a BridgeAI publica em `<app>.bridgeai.app/testar`
+construir, chame `registrar_build` — a BridgeAI publica em `<app>.bridgeaibrasil.com.br/testar`
 uma página fixa com o QR atual, o link de instalação, o histórico de versões com
 retorno para a anterior, e o que mudou.
 
