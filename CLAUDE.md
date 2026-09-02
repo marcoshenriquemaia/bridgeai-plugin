@@ -51,6 +51,28 @@ que o MCP precisa cumprir. Ao renomear uma ferramenta no servidor, atualize aqui
 matcher de `hooks/hooks.json` — o matcher lista por nome as operações sem volta, e
 uma ferramenta destrutiva fora dessa lista passa sem aprovação.
 
+⚠️ **O contrato foi escrito antes do servidor, e por um tempo mentiu.** A tabela
+anunciava 23 ferramentas quando existiam 10, e o Claude prometia ao usuário coisas
+que estouravam na cara dele. Hoje `platform.md` lista as 12 que existem e diz por
+extenso quais não existem. Ao acrescentar ferramenta no servidor, a tabela e a lista
+de ausentes mudam JUNTAS — uma POC feita como usuário comum é o que pegou isso, e
+ela está em `poc/2026-09-02-ana-acolhe.md`.
+
+## O túnel
+
+[scripts/tunnel.js](scripts/tunnel.js) é a ponta local do túnel: abre um
+`127.0.0.1:5432` e o liga ao banco do projeto por dentro do WebSocket do MCP. É o
+que faz "servidor local, dados na nuvem" funcionar sem Docker.
+
+**Zero dependência, e isso é requisito, não estilo.** Ele roda na máquina do
+usuário, que pode não ter `node_modules` nenhum — mandar alguém rodar `npm install`
+antes de conseguir desenvolver é o degrau que o produto promete tirar. Por isso
+`WebSocket` global do Node e `node:net`, e nada além.
+
+O protocolo entre as duas pontas é testado em `mcp/src/tunnel.test.ts`, que
+reescreve este cliente em vez de importá-lo — se os dois divergirem, é lá que
+aparece.
+
 ## Ainda falta
 
 - Skills de domínio próprio e de deploy
