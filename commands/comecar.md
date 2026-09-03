@@ -125,7 +125,7 @@ São três passos, nesta ordem, e a ordem importa.
 node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --app <app> --environment dev
 ```
 
-Ele abre um `127.0.0.1:5432` que se comporta como um Postgres comum e precisa do
+Ele abre um `127.0.0.1:55432` que se comporta como um Postgres comum e precisa do
 `BRIDGEAI_TOKEN` no ambiente — o mesmo do login. Quando alguma coisa estiver errada
 (ambiente que não existe, projeto de outra pessoa, acesso vencido), ele diz o motivo
 em português e sai; **leia o que ele disse antes de tentar outra coisa.**
@@ -144,12 +144,16 @@ mande o endereço:
 ### Quando o projeto não tem ambiente de desenvolvimento
 
 O túnel **não abre para produção**, de propósito: o banco de quem está usando o site
-dele não vem para a máquina de ninguém. E ambiente separado para desenvolver é do
-plano Pro para cima — num Starter, que só tem produção, não há para onde tunelar.
+dele não vem para a máquina de ninguém. Num app que só tem produção não há para onde
+tunelar.
 
 Nesse caso **não invente um contorno**. Diga o que dá para fazer: escrever o código,
 publicar, e olhar o resultado no endereço do app. `status`, `logs` e `query`
 investigam lá, que é para isso que existem.
+
+⚠️ **Não culpe o plano.** O ambiente local vem em todos, Starter incluído. Um app
+sem ele foi publicado antes de o provisionamento saber criá-lo — dizer "é do plano
+Pro para cima" faz a pessoa pagar R$ 200 a mais por mês por algo que ela já tem.
 
 ### Se o servidor local reclamar de "connection refused"
 

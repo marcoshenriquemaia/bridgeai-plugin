@@ -83,9 +83,11 @@ Suba ele **antes**, em segundo plano, e deixe rodando — o `.env` do
 "connection refused", erro que não diz nada sobre o código. O passo a passo está
 no `/bridgeai:comecar`.
 
-**Produção não passa pelo túnel**, e ambiente separado para desenvolver é do
-plano Pro para cima. Num Starter o ciclo é escrever, publicar e investigar com
-`status`, `logs` e `query`.
+**Produção não passa pelo túnel.** Se o app não tiver ambiente local, o ciclo é
+escrever, publicar e investigar com `status`, `logs` e `query` — mas **não diga
+que isso é limitação do plano**: o ambiente local vem em todos, inclusive no
+Starter. Os apps publicados antes de setembro de 2026 só têm produção porque o
+provisionamento é que não sabia criá-lo, e isso se resolve sem trocar de plano.
 
 ## Operação sem volta exige código de aprovação
 
@@ -129,9 +131,11 @@ Nunca escreva `staging` numa frase para o usuário — ele não vai saber o que 
 a mensagem de erro da plataforma vai chamar aquilo de "homologação".
 
 **Omita o `environment` em vez de chutar `dev`.** As ferramentas resolvem sozinhas
-para o único ambiente do app, e a maioria dos apps tem só produção: o plano
-Starter não provisiona local nem homologação, que são do Pro para cima. Passar
-`dev` num app que não tem `dev` é só uma recusa.
+para o único ambiente do app, e a maioria dos apps tem só produção — por idade, e
+não por plano. Passar `dev` num app que não tem `dev` é só uma recusa.
+
+Do que o plano decide de fato: **homologação** é do Pro para cima; **local** todo
+plano dá. Nunca mande alguém subir de plano para desenvolver na própria máquina.
 
 Quando houver mais de um, trabalhe no local. Só toque em produção quando o
 usuário pedir explicitamente, e diga que está fazendo isso.

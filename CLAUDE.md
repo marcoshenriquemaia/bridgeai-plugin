@@ -61,13 +61,34 @@ ela está em `poc/2026-09-02-ana-acolhe.md`.
 ## O túnel
 
 [scripts/tunnel.js](scripts/tunnel.js) é a ponta local do túnel: abre um
-`127.0.0.1:5432` e o liga ao banco do projeto por dentro do WebSocket do MCP. É o
+`127.0.0.1:55432` e o liga ao banco do projeto por dentro do WebSocket do MCP. É o
 que faz "servidor local, dados na nuvem" funcionar sem Docker.
 
 **Zero dependência, e isso é requisito, não estilo.** Ele roda na máquina do
 usuário, que pode não ter `node_modules` nenhum — mandar alguém rodar `npm install`
 antes de conseguir desenvolver é o degrau que o produto promete tirar. Por isso
 `WebSocket` global do Node e `node:net`, e nada além.
+
+**A porta é 55432 e não 5432, e isso é segurança de dado.** A 5432 é a porta do
+Postgres de todo mundo: numa máquina que já tinha um Postgres em Docker os dois
+subiam juntos sem reclamar, porque no Windows ligar em `127.0.0.1:5432` com um
+`0.0.0.0:5432` existente é permitido e o endereço específico vence. O perigo não
+é a colisão — é o silêncio ao contrário: **se o túnel cair enquanto o app roda, a
+próxima conexão cai no Postgres local sem erro nenhum, e a migration seguinte vai
+para o banco errado.**
+
+Daí as duas conferências no arranque, e as duas precisam continuar existindo:
+
+- **`ocupada()` conecta na porta antes de escutar nela**, e recusa subir se
+  alguém atender. Confiar no `EADDRINUSE` do `listen` não serve: no Windows ele
+  não acontece.
+- **`apresentacao()` abre um WebSocket e fecha**, só para ver se o banco da nuvem
+  respondeu. O servidor conecta o banco ANTES de aceitar o upgrade, então um
+  `open` prova o caminho inteiro. Sem isso, "Túnel aberto" queria dizer apenas
+  "consegui reservar a porta".
+
+Ao mudar o número, mude junto o `porta` do `credentials` em
+`mcp/src/real-source.ts` — é ele que escreve o `.env` que aponta para cá.
 
 O protocolo entre as duas pontas é testado em `mcp/src/tunnel.test.ts`, que
 reescreve este cliente em vez de importá-lo — se os dois divergirem, é lá que
