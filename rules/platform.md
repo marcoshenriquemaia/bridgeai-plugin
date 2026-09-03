@@ -66,8 +66,11 @@ usuário, do lado de lá do vidro. `list_variables` diz se ele já preencheu e c
 quantos caracteres — nunca o valor. Jamais peça uma chave no chat, e não a
 aceite se ele mandar: segredo colado numa conversa fica no histórico para sempre.
 
-Um valor preenchido está guardado e cifrado, mas **só chega ao contêiner na
-próxima publicação**. Não diga que o app já está usando.
+Um valor preenchido está guardado e cifrado, e **ainda não está no app**: quem
+o entrega é o botão "Aplicar agora", no painel, que reinicia o contêiner por
+alguns segundos. `list_variables` diz quais já chegaram. Enquanto não chegarem,
+não diga que o app está usando — e não mande esperar a próxima publicação, que é
+o que esta regra dizia antes de o botão existir.
 
 ## Desenvolver na máquina dele
 
