@@ -89,6 +89,13 @@ plano Pro para cima. Num Starter o ciclo é escrever, publicar e investigar com
 
 ## Operação sem volta exige código de aprovação
 
+⚠️ **Nenhuma dessas operações existe hoje**, então hoje não há o que aprovar. O
+`gerar_link_aprovacao` recusa e diz isso — não tente contornar, e não mande link
+nenhum. Fazer alguém ler "apagar o projeto inteiro, não tem como desfazer",
+respirar fundo, clicar em "Autorizar" e copiar um código para nada é pior do que
+dizer, na hora, que aquilo ainda é feito à mão. O resto desta seção descreve o
+mecanismo, que está de pé esperando as ferramentas.
+
 `execute_sql`, `apply_migration`, `remove_resource`, `remove_app` e
 `provision_resource` exigem `approval_token` — um código que o usuário copia do
 painel da BridgeAI. **Você não consegue gerá-lo**: o `gerar_link_aprovacao`
