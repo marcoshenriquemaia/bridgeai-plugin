@@ -78,8 +78,14 @@ economiza.
 
 O número tem de sair de `estimate_cost`, e não da sua cabeça. Se o usuário já tem um
 app, `estimate_cost` responde direto. Se é o primeiro, você ainda não tem um app para
-consultar: diga a faixa dos planos como referência (dev R$ 39, starter R$ 97) e
-avise que o número exato sai assim que o projeto existir.
+consultar: diga a faixa como referência — **um projeto pequeno com servidor, banco,
+cache e armazenamento fica em torno de R$ 88 por mês** — e avise que o número exato
+sai assim que o projeto existir.
+
+Não cite preço de plano. **Não existe mais.** A cobrança é por consumo, hora a hora,
+item por item: um projeto que não precisa de cache não paga cache. Dizer "o Starter
+custa R$ 97" cotaria R$ 9,42 acima do que a pessoa realmente pagaria, e ainda faria
+parecer que ela paga por um pacote em vez do que usa.
 
 ## Etapa 4 — Criar
 

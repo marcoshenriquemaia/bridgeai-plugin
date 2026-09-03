@@ -38,7 +38,7 @@ Nada de tabela de bytes, hora de CPU ou unidade que ele não usa no dia a dia.
 
 Chame `estimate_cost` e responda com os dois números — o de hoje e o de depois:
 
-> "Adicionar cache custa R$ 12 por mês. Sua conta vai de R$ 97 para R$ 109."
+> "Adicionar cache custa R$ 7 por mês. Sua conta vai de R$ 88 para R$ 95."
 
 E se você achar que não vale a pena, diga antes dele perguntar.
 
