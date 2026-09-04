@@ -1,24 +1,34 @@
 # Publica este projeto na BridgeAI.
 #
-# Copie para `.github/workflows/publicar.yml` no repositório do projeto.
+# Quem escreve este arquivo é o `/bridgeai:publicar` — ele preenche o `BRIDGEAI_APP`
+# com o id do seu app e empurra. Se você chegou aqui à mão, troque o valor.
 #
-# ## O que ele faz, e por que assim
+# ## Não há nenhum segredo para configurar. É a diferença deste arquivo.
+#
+# Até 04/09/2026 era preciso abrir o GitHub, achar Settings → Secrets and
+# variables → Actions e colar um token da BridgeAI. Não é mais: o próprio GitHub
+# assina, a cada execução, um **crachá** dizendo de qual repositório ela veio, e
+# a BridgeAI confere essa assinatura contra a chave pública dele.
+#
+# Consequências práticas, e todas boas: não há o que colar, não há o que
+# rotacionar, e não existe uma credencial nossa dentro do seu repositório para
+# vazar num fork, num log de build ou num colaborador que entrou e saiu. O
+# crachá vale minutos e serve para um repositório só.
+#
+# O que autoriza a publicação é o **dono**: o crachá diz, assinado pelo GitHub,
+# que este repositório é seu, e o app é seu. A primeira publicação amarra os
+# dois; daí em diante, só este repositório publica neste app.
+#
+# ## O que este arquivo faz, e por que assim
 #
 # **A BridgeAI não busca o código de ninguém.** Este repositório é seu; a
 # plataforma nunca pede permissão para lê-lo. Quem empurra é este workflow, que
-# roda na sua conta, com um token que vale só para o seu app — e para nada além
-# de publicar nele.
+# roda na sua conta.
 #
 # **Quem compila é esta Action, e não a nossa máquina.** A VM da BridgeAI é
 # dividida com outros projetos, e um `docker build` come CPU e disco de todos
 # eles. Aqui o build é seu, sai de graça no GitHub, e o que sobe é a imagem
 # pronta.
-#
-# ## O que você precisa configurar, uma vez
-#
-# Um segredo, em Settings → Secrets and variables → Actions:
-#
-#   BRIDGEAI_DEPLOY_TOKEN   o token que a BridgeAI te deu (começa com bai_deploy_)
 #
 # ## A etiqueta da imagem não é escolha sua, e isso é de propósito
 #
@@ -34,6 +44,21 @@ on:
     branches: [main]
   # Um botão em Actions, para publicar sem precisar de um commit novo.
   workflow_dispatch:
+
+# `id-token: write` é o que permite pedir o crachá ao GitHub. Sem esta linha os
+# passos abaixo não têm como se identificar, e a publicação para no primeiro.
+# `contents: read` é o mínimo do checkout: declarar as duas deixa o resto do
+# `GITHUB_TOKEN` sem permissão nenhuma.
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  # O id do app na BridgeAI. Ele diz para ONDE publicar; quem diz QUEM está
+  # publicando é a assinatura do GitHub, então este valor não é segredo.
+  BRIDGEAI_APP: APP_ID_AQUI
+  BRIDGEAI_AMBIENTE: prod
+  BRIDGEAI_URL: https://mcp.bridgeaibrasil.com.br
 
 jobs:
   publicar:
@@ -51,37 +76,43 @@ jobs:
       - name: Compilar a imagem
         run: docker build -t projeto-local:${{ github.sha }} .
 
-      # Sem o segredo, o passo seguinte morria em "exit code 1" e nenhuma
-      # frase — e todo repositório novo dispara este workflow no primeiro push,
-      # antes de o token existir. Ver poc/2026-09-04-painel-do-dono.md, achado 6.
-      - name: Conferir o token
-        env:
-          TOKEN: ${{ secrets.BRIDGEAI_DEPLOY_TOKEN }}
+      - name: Pedir onde subir
+        id: destino
         run: |
-          if [ -z "$TOKEN" ]; then
-            echo "::error::Falta o segredo BRIDGEAI_DEPLOY_TOKEN. Gere o token no painel da BridgeAI (cartão do app → 'Gerar token de publicação') e cole em Settings → Secrets and variables → Actions → New repository secret."
+          set -euo pipefail
+
+          # Estas duas variáveis só existem quando `id-token: write` está
+          # declarado lá em cima. Sem a conferência, o passo morria num `curl`
+          # para uma URL vazia e a mensagem não falava da causa.
+          if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+            echo "::error::Este workflow não pode pedir o crachá ao GitHub. Falta 'permissions: id-token: write' no topo do arquivo."
             exit 1
           fi
 
-      - name: Pedir onde subir
-        id: destino
-        env:
-          TOKEN: ${{ secrets.BRIDGEAI_DEPLOY_TOKEN }}
-        run: |
-          set -euo pipefail
-          resposta=$(curl -sS -X POST https://mcp.bridgeaibrasil.com.br/deploy/upload-url \
-            -H "authorization: Bearer $TOKEN" \
+          # O crachá é a credencial da vez. Ele fica em arquivo e nunca em
+          # `$GITHUB_OUTPUT` nem em `$GITHUB_ENV`: os dois viajam para os passos
+          # seguintes e aparecem no log da execução.
+          curl -sS -H "authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=bridgeai" | jq -er .value > /tmp/cracha
+
+          resposta=$(curl -sS --fail-with-body -X POST "$BRIDGEAI_URL/deploy/upload-url" \
+            -H "authorization: Bearer $(cat /tmp/cracha)" \
             -H 'content-type: application/json' \
-            -d "{\"environment\":\"prod\",\"commit\":\"${{ github.sha }}\",\"ref\":\"${{ github.ref }}\"}")
+            -d "{\"app\":\"$BRIDGEAI_APP\",\"environment\":\"$BRIDGEAI_AMBIENTE\"}")
 
           # O `jq -e` sai diferente de zero quando o campo não existe: sem ele,
           # um erro da plataforma viraria uma variável vazia e o passo seguinte
           # falharia falando de outra coisa.
           echo "id=$(echo "$resposta" | jq -er .deployId)"  >> "$GITHUB_OUTPUT"
           echo "tag=$(echo "$resposta" | jq -er .imageTag)" >> "$GITHUB_OUTPUT"
+
           # A URL assinada NÃO vai para o $GITHUB_OUTPUT: ela é a credencial, e
           # output de passo aparece no log da execução.
           echo "$resposta" | jq -er .uploadUrl > /tmp/upload-url
+
+          if [ "$(echo "$resposta" | jq -r .bound)" = "true" ]; then
+            echo "::notice::Repositório vinculado ao app $BRIDGEAI_APP. Daqui em diante, só ele publica lá."
+          fi
 
       - name: Empacotar e subir
         run: |
@@ -97,18 +128,24 @@ jobs:
           curl -sS --fail-with-body -X PUT --upload-file /tmp/imagem.tar "$(cat /tmp/upload-url)"
 
       - name: Publicar
-        env:
-          TOKEN: ${{ secrets.BRIDGEAI_DEPLOY_TOKEN }}
         run: |
           set -euo pipefail
+
+          # Um crachá NOVO, e não o de dez minutos atrás: ele vale poucos
+          # minutos, e subir uma imagem grande pode passar disso. Pedir de novo
+          # custa uma chamada e evita uma falha que só aparece em projeto médio.
+          curl -sS -H "authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=bridgeai" | jq -er .value > /tmp/cracha
+
           # A chamada só volta no fim: ela carrega a imagem, troca o contêiner e
           # espera o app atender. É por isso que ela demora, e é por isso que um
           # verde aqui quer dizer que o site está no ar.
           curl -sS --fail-with-body --max-time 900 \
-            -X POST https://mcp.bridgeaibrasil.com.br/deploy \
-            -H "authorization: Bearer $TOKEN" \
+            -X POST "$BRIDGEAI_URL/deploy" \
+            -H "authorization: Bearer $(cat /tmp/cracha)" \
             -H 'content-type: application/json' \
-            -d "{\"deployId\":\"${{ steps.destino.outputs.id }}\"}" | tee /tmp/resultado.json
+            -d "{\"app\":\"$BRIDGEAI_APP\",\"deployId\":\"${{ steps.destino.outputs.id }}\"}" \
+            | tee /tmp/resultado.json
 
           # `healthy: false` não é falha de publicação — a imagem subiu e o
           # contêiner está de pé. É aviso: o app não respondeu no caminho de

@@ -64,13 +64,23 @@ Diga isso ao usuário antes de mandar o link, não depois de executar. O que sai
 não é apagado: os arquivos do armazenamento ficam, só a cobrança para.
 
 **Publicar não é ferramenta MCP.** Quem publica é a GitHub Action do
-repositório do usuário, com um token que ele gera no painel do app ("Gerar
-token de publicação") e cola em `Settings → Secrets and variables → Actions`
-como `BRIDGEAI_DEPLOY_TOKEN`. O workflow de exemplo está em
-`templates/publicar.yml` deste plugin — aponte-o. Cada envio para a branch
-principal publica sozinho.
+repositório do usuário — e **não há segredo nenhum para configurar lá**. A
+Action pede um crachá ao próprio GitHub (`permissions: id-token: write`), que
+o assina dizendo de qual repositório ela veio; a BridgeAI confere essa
+assinatura. O workflow está em `templates/publicar.yml` e o comando que faz
+tudo é `/bridgeai:publicar`. Cada envio para a branch principal publica
+sozinho.
 
-**O token de publicação nunca passa por você.** Se o usuário colar no chat,
+**O vínculo repositório↔app se estabelece na primeira publicação**, e o que o
+autoriza é o dono: o crachá prova que o repositório é da mesma conta do GitHub
+que é dona do app. Daí em diante, só aquele repositório publica naquele app.
+
+**A exceção é repositório de organização**: ali o dono do repositório não é a
+pessoa, então o vínculo automático não acontece — e não deve. Só nesse caso
+existe o token de publicação do painel ("Gerar token de publicação"), colado em
+`Settings → Secrets and variables → Actions` como `BRIDGEAI_DEPLOY_TOKEN`.
+
+**Esse token, quando usado, nunca passa por você.** Se o usuário colar no chat,
 diga que ele foi parar no histórico e peça para gerar outro no painel (emitir
 um novo revoga o anterior) e colar direto no GitHub. Não use o que chegou.
 

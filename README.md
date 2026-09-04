@@ -57,6 +57,7 @@ der erro, baixe a versão LTS em [nodejs.org](https://nodejs.org). O
 |---|---|
 | `/bridgeai:entrar` | Conectar esta máquina à sua conta |
 | `/bridgeai:comecar` | Da máquina vazia ao projeto rodando |
+| `/bridgeai:publicar` | Põe o projeto no ar, sem configurar nada no GitHub |
 | `/bridgeai:doutor` | Quando "parou de funcionar" — confere e conserta |
 | `/bridgeai:custo` | Quanto está gastando e no que dá para economizar |
 

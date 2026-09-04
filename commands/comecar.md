@@ -185,21 +185,26 @@ esse erro não diz nada sobre o código dele.
 
 ## Etapa 7 — Publicar
 
-Quem publica é uma GitHub Action no repositório dele, e não uma ferramenta sua. Três
-coisas, e só a segunda é dele:
+Quem publica é uma GitHub Action no repositório dele, e não uma ferramenta sua. **E
+não há nada para ele configurar no GitHub**: a Action se identifica com um crachá
+que o próprio GitHub assina, e a BridgeAI confere a assinatura. Não existe segredo
+para colar.
 
-1. **O workflow e o Dockerfile.** Copie `${CLAUDE_PLUGIN_ROOT}/templates/publicar.yml`
-   para `.github/workflows/publicar.yml`, e escreva um `Dockerfile` que suba o app na
-   porta que ele usa. Confira que `/api/health` responde 200.
-2. **O token de publicação**, que só ele gera. Passo a passo, um por linha: abrir o
-   app em https://painel.bridgeaibrasil.com.br, clicar em "Gerar token de
-   publicação", copiar; abrir
-   `https://github.com/<dono>/<repo>/settings/secrets/actions`, "New repository
-   secret", nome `BRIDGEAI_DEPLOY_TOKEN`, colar, salvar. Termine com "me avisa quando
-   terminar". O token aparece **uma vez**; se perder, gera outro e o anterior morre.
-3. **Um `git push` na branch principal.** A Action compila, sobe a imagem e troca o
-   contêiner — uns 30 segundos. Confira com `status` e só então mande o endereço
-   `https://<app>.bridgeaibrasil.com.br`.
+Siga o `/bridgeai:publicar` — ele é este passo inteiro, e é retomável. Em resumo:
+
+1. **O Dockerfile e o workflow.** Escreva um `Dockerfile` que suba o app na porta
+   que ele usa e confira que o caminho de saúde responde 200. Copie
+   `${CLAUDE_PLUGIN_ROOT}/templates/publicar.yml` para
+   `.github/workflows/publicar.yml`, trocando `APP_ID_AQUI` pelo id do app.
+2. **Um `git push` na branch principal.** A Action compila, sobe a imagem e troca o
+   contêiner — uns 30 segundos, e cerca de um minuto na primeira vez. Acompanhe com
+   `gh run watch --exit-status`, e não mandando ele abrir a aba Actions.
+3. **`status`, e só então o endereço** `https://<app>.bridgeaibrasil.com.br`.
+
+⚠️ Repositório de **organização** é a exceção: o vínculo automático compara o dono
+do repositório com o dono do app, então ele não acontece ali. Só nesse caso use o
+token de publicação do painel, colado em `Settings → Secrets and variables →
+Actions` como `BRIDGEAI_DEPLOY_TOKEN`.
 
 ---
 
