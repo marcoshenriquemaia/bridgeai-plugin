@@ -126,6 +126,12 @@ alguns segundos. `list_variables` diz quais já chegaram. Enquanto não chegarem
 não diga que o app está usando — e não mande esperar a próxima publicação, que é
 o que esta regra dizia antes de o botão existir.
 
+Um valor guardado some das pendências, e **dá para trocá-lo sem pedir de novo**:
+a seção "Guardadas", na mesma tela do painel, tem "Trocar valor" para cada um.
+É o caminho para chave colada errada ou token revogado. Só chame
+`request_variable` de novo se o pedido mudou de descrição, e não para reabrir
+um que já foi preenchido.
+
 ## Desenvolver na máquina dele
 
 O servidor roda na máquina da pessoa; banco e armazenamento ficam na nuvem.
