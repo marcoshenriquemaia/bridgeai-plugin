@@ -51,6 +51,18 @@ jobs:
       - name: Compilar a imagem
         run: docker build -t projeto-local:${{ github.sha }} .
 
+      # Sem o segredo, o passo seguinte morria em "exit code 1" e nenhuma
+      # frase — e todo repositório novo dispara este workflow no primeiro push,
+      # antes de o token existir. Ver poc/2026-09-04-painel-do-dono.md, achado 6.
+      - name: Conferir o token
+        env:
+          TOKEN: ${{ secrets.BRIDGEAI_DEPLOY_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::Falta o segredo BRIDGEAI_DEPLOY_TOKEN. Gere o token no painel da BridgeAI (cartão do app → 'Gerar token de publicação') e cole em Settings → Secrets and variables → Actions → New repository secret."
+            exit 1
+          fi
+
       - name: Pedir onde subir
         id: destino
         env:

@@ -66,6 +66,20 @@ como `BRIDGEAI_DEPLOY_TOKEN`. O workflow de exemplo está em
 `templates/publicar.yml` deste plugin — aponte-o. Cada envio para a branch
 principal publica sozinho.
 
+**O token de publicação nunca passa por você.** Se o usuário colar no chat,
+diga que ele foi parar no histórico e peça para gerar outro no painel (emitir
+um novo revoga o anterior) e colar direto no GitHub. Não use o que chegou.
+
+**App Node com o driver `pg` direto:** a `DATABASE_URL` de produção vem com
+`sslmode=require`, no sentido do libpq. O `pg` lê isso como `verify-full`, o
+certificado do banco é autoassinado, e o app morre em "self-signed
+certificate". Acrescente `&uselibpqcompat=true` na URL ao criar o pool. Prisma
+e os outros drivers não precisam.
+
+**A primeira publicação demora mais** (cerca de um minuto): ela cria o
+contêiner, rotaciona as credenciais e entrega tudo que o usuário já guardou no
+painel — sem "Aplicar agora". A resposta da Action diz `firstDeploy: true`.
+
 Não existem `suggest_plan`, `deploy`, `set_variable`, `configure_domain`,
 `execute_sql`, `apply_migration`, `registrar_build` nem `publicar_dashboard`.
 
