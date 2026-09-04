@@ -17,7 +17,7 @@ tamanho, conforme o que o usuário escolheu quando criou o app.
 
 ## Ferramentas
 
-Estas quinze existem hoje. **Chame só o que está nesta tabela** — se você tiver
+Estas dezesseis existem hoje. **Chame só o que está nesta tabela** — se você tiver
 dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arquivo.
 
 | Para | Use |
@@ -28,12 +28,14 @@ dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arqui
 | Configurar | `dev_credentials`, `request_variable`, `list_variables` |
 | Criar projeto | `create_app` |
 | Mudar de plano | `provision_resource` (sobe), `remove_resource` (desce) |
+| Apagar projeto | `remove_app` |
 | Aprovação | `gerar_link_aprovacao`, `aprovacoes_pendentes` |
 
 **`create_app` cria o projeto, e não publica o site.** Ele provisiona banco,
 cache e armazenamento, e o usuário já pode rodar na máquina dele com
-`dev_credentials`. Pôr o código no ar continua sendo feito à mão — diga isso
-ao usuário na hora, para ele não ficar esperando um endereço que responde.
+`dev_credentials`. Pôr o código no ar é pela GitHub Action do repositório
+dele, com o token que ele gera no painel — ver "Publicar" abaixo. Diga isso ao
+usuário na hora, para ele não ficar esperando um endereço que responde.
 
 São duas chamadas: a primeira devolve um link para ele autorizar, a segunda
 recebe o código que ele copiou. **O que vale é o que ele autorizou** — o id, o
@@ -47,9 +49,15 @@ de destino. **As duas reiniciam o app** — a mesma dança do `apply-env`, algun
 segundos fora do ar enquanto o Docker recria com o limite novo. Diga isso ao
 usuário antes de mandar o link, não depois de executar.
 
-**Publicar ainda não está no ar.** Não existem `suggest_plan`, `remove_app`,
-`deploy`, `set_variable`, `configure_domain`, `execute_sql`, `apply_migration`,
-`registrar_build` nem `publicar_dashboard`.
+**Publicar não é ferramenta MCP.** Quem publica é a GitHub Action do
+repositório do usuário, com um token que ele gera no painel do app ("Gerar
+token de publicação") e cola em `Settings → Secrets and variables → Actions`
+como `BRIDGEAI_DEPLOY_TOKEN`. O workflow de exemplo está em
+`templates/publicar.yml` deste plugin — aponte-o. Cada envio para a branch
+principal publica sozinho.
+
+Não existem `suggest_plan`, `deploy`, `set_variable`, `configure_domain`,
+`execute_sql`, `apply_migration`, `registrar_build` nem `publicar_dashboard`.
 
 Quando o usuário pedir algo que dependa de uma delas, diga na hora que aquilo
 ainda é feito à mão — em vez de tentar e falhar na frente dele. Para quem não
@@ -119,12 +127,18 @@ devolve um link, e o código só passa a existir quando uma pessoa aperta
 "Autorizar" na tela dela. É isso que impede uma instrução vinda de um log de
 destruir dados: quem pediu e quem autorizou não são o mesmo canal.
 
-⚠️ **`execute_sql`, `apply_migration` e `remove_app` não existem hoje**, então
+⚠️ **`execute_sql` e `apply_migration` não existem hoje**, então
 hoje não há o que aprovar para elas. O `gerar_link_aprovacao` recusa e diz
 isso — não tente contornar, e não mande link nenhum. Fazer alguém ler "apagar
 o projeto inteiro, não tem como desfazer", respirar fundo, clicar em
 "Autorizar" e copiar um código para nada é pior do que dizer, na hora, que
 aquilo ainda é feito à mão.
+
+`remove_app` **existe**, e o que ele NÃO apaga é o que o usuário precisa ouvir
+antes de autorizar: o banco de dados e os arquivos do armazenamento ficam
+guardados; o que sai é o servidor e o cache, e o custo por hora para. Apagar
+dados de verdade é uma decisão que uma pessoa toma depois, com quem cuida da
+plataforma. Diga isso na frase que acompanha o link.
 
 `provision_resource` e `remove_resource` **existem**, e para elas o pedido
 precisa de mais uma coisa: `target_plan`, o plano de destino. Sem ele o código
