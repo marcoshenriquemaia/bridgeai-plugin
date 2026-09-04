@@ -110,3 +110,30 @@ test('check-push: entrada que não é objeto NÃO derruba o hook — e abre', ()
     assert.equal(r.out, '', `falou algo com ${JSON.stringify(entrada)}`);
   }
 });
+
+// ---------------------------------------------------------------------------
+// O hook de SessionStart
+// ---------------------------------------------------------------------------
+
+// ⚠️ Aqui existia um aviso de "você ainda não entrou", disparado por
+// `BRIDGEAI_TOKEN` estar vazia. Ele saiu em 04/09/2026: quem entra pelo OAuth do
+// Claude Code não define variável de ambiente nenhuma, e o aviso passaria a
+// aparecer em TODA sessão de quem já está dentro.
+//
+// O teste afirma a AUSÊNCIA da frase antiga. Afirmar só que as regras carregam
+// deixaria a volta dela passar batida.
+test('load-platform: não inventa que o usuário está desconectado', () => {
+  const r = spawnSync(process.execPath, [path.join(__dirname, 'load-platform.js')], {
+    input: JSON.stringify({ hook_event_name: 'SessionStart' }),
+    encoding: 'utf8',
+    timeout: 15000,
+    env: { ...process.env, BRIDGEAI_TOKEN: '' },
+  });
+
+  assert.equal(r.status, 0);
+  const texto = JSON.parse(r.stdout).hookSpecificOutput.additionalContext;
+
+  assert.ok(texto.includes('BridgeAI'), 'as regras da plataforma não carregaram');
+  assert.doesNotMatch(texto, /ainda não está conectado/);
+  assert.doesNotMatch(texto, /BRIDGEAI_TOKEN/);
+});

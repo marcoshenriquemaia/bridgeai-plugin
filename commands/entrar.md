@@ -6,35 +6,37 @@ Você vai conectar esta máquina à conta BridgeAI do usuário. É o passo que f
 ferramentas `mcp__bridgeai__*` aparecerem — sem ele, o plugin está instalado e não
 enxerga nada.
 
-**Avise antes o que vai aparecer**, senão ele trava na tela de permissão:
+**O login é do próprio Claude Code, e não um script.** O servidor da BridgeAI é um
+servidor de autorização: o Claude Code descobre isso sozinho, abre o navegador e
+guarda o acesso. Não há token para colar, variável de ambiente para definir, nem
+reinício depois.
 
-> "Vou te conectar à BridgeAI. Vai aparecer um código de 8 letras e o navegador vai
-> abrir sozinho no GitHub. É só digitar o código lá e clicar em autorizar. Se pedir
-> permissão para ler seu e-mail, pode confirmar — é só isso que ela pede."
+Peça isto, exatamente nesta ordem:
 
-Rode:
+> "Digite `/mcp`, escolha **bridgeai** e clique em autenticar. O navegador vai abrir
+> no GitHub — é só autorizar. Se ele pedir permissão para ler seu e-mail, pode
+> confirmar: é a única que a BridgeAI pede, e é para avisar quando o crédito
+> estiver acabando."
 
-```
-node "${CLAUDE_PLUGIN_ROOT}/scripts/login.js"
-```
+`/mcp` é um comando do Claude Code e só o usuário pode digitar — você não consegue
+rodar por ele. Espere ele dizer que terminou.
 
-Mostre o código **em destaque, sozinho numa linha**, e espere. O script fica
-esperando a confirmação e termina sozinho.
+**Não peça, não leia e não procure o acesso.** Ele não passa pelo chat, não fica em
+variável de ambiente e não tem arquivo para abrir. Se o usuário colar alguma coisa
+que pareça um token, diga que foi parar no histórico e que ele deve entrar de novo
+por `/mcp`.
 
-**O acesso é gravado direto no ambiente da máquina, e nunca aparece na tela.** Não
-tente lê-lo, não peça para o usuário colar nada, e não procure onde ficou. Se o
-script disser que entrou, entrou.
+## Confira antes de dizer que deu certo
 
-Quando terminar, diga ao usuário a única coisa que falta, e que só ele pode fazer:
+Chame `list_apps`. Se responder, entrou — diga com quem, e siga para o que ele
+queria fazer.
 
-> "Pronto, você entrou como <nome>. Agora feche o Claude Code e abra de novo — é
-> assim que ele passa a enxergar seus projetos. Quando voltar, é só me chamar."
+Se as ferramentas continuarem sem aparecer:
 
-Se ele ainda não tiver conta no GitHub, mande criar em https://github.com/signup —
-é e-mail e senha, três minutos. A mesma conta serve para a BridgeAI e para guardar o
-código do projeto.
-
-Se o script disser que a plataforma não respondeu, tente uma vez mais. Se
-continuar, pare e diga com todas as letras: o problema não é da máquina dele.
+- **"bridgeai failed" ou "needs authentication" em `/mcp`** — a autenticação não
+  chegou ao fim. Peça para repetir; o navegador pode ter sido fechado antes.
+- **O plugin foi instalado agora** — o Claude Code lê a lista de servidores ao
+  abrir. Aqui, e só aqui, fechar e abrir resolve.
+- **Nada disso** — rode `/bridgeai:doutor`.
 
 $ARGUMENTS

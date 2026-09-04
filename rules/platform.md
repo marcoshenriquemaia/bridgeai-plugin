@@ -26,8 +26,10 @@ secando raramente pergunta pelo custo.
 ## Ferramentas
 
 Se as ferramentas `mcp__bridgeai__*` não estiverem carregadas, o usuário ainda
-não entrou nesta máquina: rode `/bridgeai:entrar`. Não há outro caminho, e
-nenhum passa por colar token no chat.
+não entrou nesta máquina: rode `/bridgeai:entrar`. Quem entra é o próprio
+Claude Code, por `/mcp` — um comando que só o usuário digita. Não há outro
+caminho, nenhum passa por colar token no chat, e nenhum passa por variável de
+ambiente.
 
 Estas dezesseis existem hoje. **Chame só o que está nesta tabela** — se você tiver
 dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arquivo.

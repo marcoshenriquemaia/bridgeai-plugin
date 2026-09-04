@@ -51,18 +51,16 @@ function read(name) {
   }
 }
 
-// Sem BRIDGEAI_TOKEN o `.mcp.json` não tem o que mandar no `Authorization`, e o
-// Claude Code só diz que o servidor "bridgeai" falhou. Quem instalou e não
-// entrou precisa ouvir o que fazer, e não um erro de conexão.
-const SEM_TOKEN =
-  '## Você ainda não está conectado à BridgeAI\n\n' +
-  'Falta o acesso desta máquina: as ferramentas `mcp__bridgeai__*` não vão aparecer ' +
-  'até o usuário entrar. Antes de qualquer coisa da plataforma, rode `/bridgeai:entrar` ' +
-  'e siga o que ele diz. Não tente contornar, e não peça token nenhum no chat.';
-
+// ⚠️ Aqui existia um aviso de "você ainda não entrou", disparado por
+// `BRIDGEAI_TOKEN` estar vazia. Ele saiu em 04/09/2026, junto com a variável:
+// quem entra pelo OAuth do Claude Code não tem variável de ambiente nenhuma, e o
+// aviso passaria a aparecer em TODA sessão de quem já está dentro — um aviso que
+// mente é pior que aviso nenhum.
+//
+// Quem diz o que fazer é o `platform.md`, e ele diz pelo sinal certo: se as
+// ferramentas `mcp__bridgeai__*` não estiverem carregadas, o usuário não entrou.
 try {
   const parts = [read('platform.md')];
-  if (!(process.env.BRIDGEAI_TOKEN || '').trim()) parts.push(SEM_TOKEN);
   if (readProfile() === 'guided') parts.push(read('guided.md'));
 
   const text = parts.filter(Boolean).join('\n\n---\n\n');
