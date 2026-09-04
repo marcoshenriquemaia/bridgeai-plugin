@@ -9,18 +9,24 @@ com estimativa de mercado. Chame `current_cost` e `describe_app`.
 
 ## O que mostrar
 
-**1. O mês até agora, e a projeção.** Quanto já foi, quanto deve fechar, e como isso
-se compara ao plano contratado. Sempre em reais por mês.
+**1. O saldo e o fôlego, antes de tudo.** Quanto tem na conta e quantos dias isso
+dura no ritmo atual, com a data — `current_cost` dá os dois. "R$ 63" não diz nada
+para quem não sabe quanto custa um servidor; "dura uns 6 dias, até 8 de setembro"
+diz.
 
-**2. Onde o dinheiro está.** Um recurso por linha, do maior para o menor. Se um item
+**2. O mês até agora, e a projeção.** Quanto já foi e quanto deve fechar. Sempre em
+reais por mês. Não compare com preço de plano: plano não é preço, e não existe teto
+de fatura — quem limita é o saldo.
+
+**3. Onde o dinheiro está.** Um recurso por linha, do maior para o menor. Se um item
 sozinho é mais da metade da conta, diga isso — é onde vale mexer.
 
-**3. Quanto falta para o teto.** E, se passar de 75%, a data provável em que chega,
-com o que acontece então: o app pausa ou sobe de tamanho, conforme a escolha feita
-na criação. Se ele escolheu pausar e isso não parece mais adequado — um site de
-loja, por exemplo —, é hora de sugerir a troca.
+**Se o fôlego for menor que sete dias, diga o que acontece** e onde recarregar
+(https://painel.bridgeaibrasil.com.br): acabando o saldo há três dias de carência,
+depois os apps da conta pausam, nada é apagado, e recarregar religa. Sem drama, e
+sem esconder.
 
-**4. O que dá para cortar.** Recurso provisionado e sem uso, ambiente que ninguém
+**O que dá para cortar.** Recurso provisionado e sem uso, ambiente que ninguém
 abre há semanas, tamanho maior do que o consumo real justifica. **Com o valor da
 economia.** Se não houver nada a cortar, diga que está enxuto — é uma informação
 boa, não uma resposta vazia.
@@ -32,7 +38,7 @@ projeto está pequeno demais para o plano, recomende descer. Se algo em outro lu
 sairia de graça e serve, diga.
 
 Nada de tabela de bytes, hora de CPU ou unidade que ele não usa no dia a dia.
-"Seu banco está com 1,2 GB dos 10 GB do plano" é útil. "18.400 IOPS" não é.
+"Seu banco está com 1,2 GB" é útil. "18.400 IOPS" não é.
 
 ## Se ele perguntar sobre uma mudança específica
 

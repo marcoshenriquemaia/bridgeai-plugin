@@ -51,8 +51,18 @@ function read(name) {
   }
 }
 
+// Sem BRIDGEAI_TOKEN o `.mcp.json` não tem o que mandar no `Authorization`, e o
+// Claude Code só diz que o servidor "bridgeai" falhou. Quem instalou e não
+// entrou precisa ouvir o que fazer, e não um erro de conexão.
+const SEM_TOKEN =
+  '## Você ainda não está conectado à BridgeAI\n\n' +
+  'Falta o acesso desta máquina: as ferramentas `mcp__bridgeai__*` não vão aparecer ' +
+  'até o usuário entrar. Antes de qualquer coisa da plataforma, rode `/bridgeai:entrar` ' +
+  'e siga o que ele diz. Não tente contornar, e não peça token nenhum no chat.';
+
 try {
   const parts = [read('platform.md')];
+  if (!(process.env.BRIDGEAI_TOKEN || '').trim()) parts.push(SEM_TOKEN);
   if (readProfile() === 'guided') parts.push(read('guided.md'));
 
   const text = parts.filter(Boolean).join('\n\n---\n\n');

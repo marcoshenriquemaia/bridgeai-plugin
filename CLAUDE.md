@@ -53,10 +53,35 @@ uma ferramenta destrutiva fora dessa lista passa sem aprovação.
 
 ⚠️ **O contrato foi escrito antes do servidor, e por um tempo mentiu.** A tabela
 anunciava 23 ferramentas quando existiam 10, e o Claude prometia ao usuário coisas
-que estouravam na cara dele. Hoje `platform.md` lista as 12 que existem e diz por
+que estouravam na cara dele. Hoje `platform.md` lista as 16 que existem e diz por
 extenso quais não existem. Ao acrescentar ferramenta no servidor, a tabela e a lista
 de ausentes mudam JUNTAS — uma POC feita como usuário comum é o que pegou isso, e
 ela está em `poc/2026-09-02-ana-acolhe.md`.
+
+**E as skills mentiram do mesmo jeito, por mais tempo.** Até 04/09/2026
+`painel-do-projeto` mandava chamar `publicar_dashboard` e `publicar-mobile`
+mandava chamar `registrar_build` — duas ferramentas que o `platform.md` dizia não
+existir. Regra e skill discordando é o pior caso: a skill carrega justamente na
+hora em que o usuário pediu aquilo. Ao conferir o plugin contra o servidor,
+confira as skills e os comandos, e não só a tabela.
+
+## O login mora aqui, e não imprime o token
+
+[scripts/login.js](scripts/login.js) é o `npm run login` do servidor portado para
+zero dependência — com uma diferença que é a razão de ele existir separado: **o
+token nunca sai no stdout.** Quem roda o script é o Claude, pela ferramenta Bash,
+e o stdout dele vai para o chat. O script grava direto no ambiente (`setx` no
+Windows, o arquivo de perfil do shell nos outros) e a tela só diz "entrou como
+fulano". O `.mcp.json` lê `${BRIDGEAI_TOKEN}` no arranque do Claude Code, então
+entrar exige fechar e abrir — não há como evitar, e o `/bridgeai:entrar` diz isso.
+
+Sem o token, o `SessionStart` acrescenta um aviso mandando rodar `/bridgeai:entrar`.
+Sem esse aviso, o que o usuário vê é "MCP server bridgeai failed", que não aponta
+para lugar nenhum.
+
+`login.test.js` afirma o negativo — o token NÃO aparece na saída — contra um
+servidor de mentira. Detalhe do teste: `spawn` e não `spawnSync`, porque o servidor
+falso vive no processo do teste e o síncrono trava o event loop que o atenderia.
 
 ## O túnel
 
@@ -94,9 +119,18 @@ O protocolo entre as duas pontas é testado em `mcp/src/tunnel.test.ts`, que
 reescreve este cliente em vez de importá-lo — se os dois divergirem, é lá que
 aparece.
 
+## O `.mcp.json` fica na raiz
+
+A documentação do Claude Code aceita dois lugares: um `.mcp.json` na **raiz do
+plugin**, ou um campo `mcpServers` dentro do `plugin.json`. Dentro de
+`.claude-plugin/` não é um deles. Está na raiz, e o item de "confirmar a posição"
+que viveu meses no roadmap sai por isso — o que ainda não aconteceu é uma
+instalação de verdade pelo marketplace, e ela depende do repositório público.
+
 ## Ainda falta
 
-- Skills de domínio próprio e de deploy
-- Agente de custos que consulta o MCP em vez de estimar
-- Confirmar a posição correta do `.mcp.json` (raiz ou `.claude-plugin/`)
-- Teste dos scripts, no formato do `check-dangerous.test.js` do guardrail
+- **Publicar**: o repositório `marcoshenriquemaia/bridgeai-plugin` que o
+  `plugin.json` e o README apontam **não existe**, e este `plugin/` mora num
+  repositório privado. Hoje ninguém consegue instalar.
+- Skill de domínio próprio (a feature não existe no servidor; a skill vem depois)
+- Teste do `load-platform.js` e do `tunnel.js`, no formato do `hooks.test.js`

@@ -3,15 +3,16 @@ description: Prepara a máquina e cria o projeto na BridgeAI, do zero até rodan
 ---
 
 Você vai levar o usuário de uma máquina possivelmente vazia até o projeto rodando.
-Ele digita este comando e assiste — só um passo pede algo dele.
+Ele digita este comando e assiste — só os logins e o token de publicação pedem algo
+dele.
 
 **Faça tudo você.** Não peça para ele instalar nada à mão, não mande abrir site de
 download, não explique o que é git. Rode, confira, siga.
 
-**Uma coisa que você precisa saber antes de começar:** a criação automática de
-projeto ainda não está no ar. Não existem `create_app` nem `suggest_plan`. A etapa 4
-abaixo é feita à mão pelo Marcos, e este comando existe para chegar até ela com tudo
-o mais pronto. Não prometa o que não vai conseguir entregar.
+**Este comando é retomável.** Se as ferramentas `mcp__bridgeai__*` não estiverem
+carregadas nesta sessão, faça as etapas 1 e 2 e **pare**: o Claude Code só passa a
+enxergar a BridgeAI depois de reaberto. Peça para ele fechar, abrir e rodar
+`/bridgeai:comecar` de novo — e, na volta, `list_apps` diz onde parou.
 
 ---
 
@@ -43,10 +44,10 @@ instalar o Homebrew inteiro na máquina de alguém.
 arquivo decide o tom das próximas sessões, e um comando que só o grava na última
 linha nunca o grava quando para no meio.
 
-## Etapa 2 — Conectar ao GitHub
+## Etapa 2 — Conectar ao GitHub e à BridgeAI
 
-Este é o único passo manual. **Avise antes o que vai aparecer**, senão ele trava
-com medo na tela de permissão:
+São dois logins com a mesma conta, e são os únicos passos manuais. **Avise antes o
+que vai aparecer**, senão ele trava com medo na tela de permissão:
 
 > "Vou te conectar ao GitHub. Vai aparecer um código de 8 letras e o navegador vai
 > abrir sozinho. A página do GitHub vai pedir permissão para acessar repositórios —
@@ -63,8 +64,13 @@ gh auth setup-git
 ```
 
 Se ele ainda não tiver conta no GitHub, mande criar em https://github.com/signup —
-é e-mail e senha, três minutos, e é a única vez que ele entra lá. A mesma conta
-serve de login da BridgeAI.
+é e-mail e senha, três minutos. A mesma conta serve de login da BridgeAI.
+
+**Depois, a BridgeAI** — só se as ferramentas `mcp__bridgeai__*` não estiverem
+carregadas. Siga o `/bridgeai:entrar`: o mesmo desenho, um código de 8 letras e o
+navegador abrindo no GitHub. O acesso é gravado no ambiente da máquina e **nunca
+aparece na tela** — não tente lê-lo. Terminou, peça para fechar e abrir o Claude
+Code e rodar este comando de novo. É a única interrupção do caminho, e é uma só.
 
 ## Etapa 3 — Entender o projeto
 
@@ -89,25 +95,31 @@ parecer que ela paga por um pacote em vez do que usa.
 
 ## Etapa 4 — Criar
 
-**Este passo ainda é manual.** Não tente chamar `create_app`: ele não existe.
-
-Diga ao usuário, sem rodeio e sem drama:
-
-> "Seu projeto está entendido e o tamanho escolhido. A criação automática ainda não
-> está aberta, então quem cria é o Marcos — leva algumas horas. Assim que estiver de
-> pé eu te aviso, e a partir daí tudo funciona por aqui."
-
-Depois, junte num só lugar o que ele vai precisar mandar: nome do projeto, o que
-faz, o plano escolhido, e o login do GitHub dele. Isso é o que o provisionamento
-precisa saber, e reunir agora evita três idas e vindas depois.
-
 **Se o app já existe** — confira com `list_apps` antes de supor que não —, pule
-direto para a etapa 5.
+para a etapa 5.
+
+Criar é `create_app`, em duas chamadas. A primeira, com `id`, `name`, `plan` e o
+`health_path` que o app vai responder (`/api/health` — e você implementa essa rota
+no código dele), devolve um link. Mande o link e explique em uma frase o que ele
+vai ler lá: o nome, o plano e o custo por mês. Ele clica em "Autorizar", copia o
+código, e a segunda chamada leva só o código.
+
+**Saldo vem antes.** `create_app` recusa sem R$ 10 de crédito e três dias de fôlego
+contando o app novo, e diz quanto tem e onde recarregar. Se for o primeiro app da
+conta, não há como consultar antes: chame, e se recusar, repasse a frase com o link
+do painel (https://painel.bridgeaibrasil.com.br) e espere ele recarregar. Uns R$ 90
+cobrem o primeiro mês de um projeto pequeno; diga esse número.
+
+O que nasce: banco, cache, armazenamento e o ambiente local. **O site NÃO fica no ar
+aqui** — publicar é a etapa 7. Diga isso na hora, para ele não abrir o endereço e
+achar que quebrou.
 
 ## Etapa 5 — Trazer para a máquina
 
-Clone em `%USERPROFILE%\BridgeAI\<nome-do-app>` no Windows, ou `~/BridgeAI/<nome>`
-no macOS e Linux.
+A pasta é `%USERPROFILE%\BridgeAI\<nome-do-app>` no Windows, ou `~/BridgeAI/<nome>`
+no macOS e Linux. Se o projeto já tem repositório, clone ali. Se é novo, crie a
+pasta, inicie o projeto, e crie o repositório privado dele com
+`gh repo create <nome> --private --source . --push`.
 
 **Nunca clone dentro de Documentos, Área de Trabalho ou OneDrive.** Essas pastas
 costumam ser sincronizadas, e a sincronização corrompe o `.git` e trava o
@@ -165,6 +177,24 @@ Pro para cima" faz a pessoa pagar R$ 200 a mais por mês por algo que ela já te
 
 É o túnel que caiu ou nunca subiu. Confira antes de mexer em qualquer outra coisa —
 esse erro não diz nada sobre o código dele.
+
+## Etapa 7 — Publicar
+
+Quem publica é uma GitHub Action no repositório dele, e não uma ferramenta sua. Três
+coisas, e só a segunda é dele:
+
+1. **O workflow e o Dockerfile.** Copie `${CLAUDE_PLUGIN_ROOT}/templates/publicar.yml`
+   para `.github/workflows/publicar.yml`, e escreva um `Dockerfile` que suba o app na
+   porta que ele usa. Confira que `/api/health` responde 200.
+2. **O token de publicação**, que só ele gera. Passo a passo, um por linha: abrir o
+   app em https://painel.bridgeaibrasil.com.br, clicar em "Gerar token de
+   publicação", copiar; abrir
+   `https://github.com/<dono>/<repo>/settings/secrets/actions`, "New repository
+   secret", nome `BRIDGEAI_DEPLOY_TOKEN`, colar, salvar. Termine com "me avisa quando
+   terminar". O token aparece **uma vez**; se perder, gera outro e o anterior morre.
+3. **Um `git push` na branch principal.** A Action compila, sobe a imagem e troca o
+   contêiner — uns 30 segundos. Confira com `status` e só então mande o endereço
+   `https://<app>.bridgeaibrasil.com.br`.
 
 ---
 

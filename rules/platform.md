@@ -10,12 +10,22 @@ existe skill para isso. Aqui está só o que precisa valer sempre.
 
 Um **app** é um projeto. Cada app tem seus **recursos** (servidor, banco, cache,
 armazenamento) e seus **ambientes** (`dev`, `staging`, `prod`) — os três no mesmo
-plano, não se cobra por ambiente. Um app, um plano, uma linha na fatura.
+plano, não se cobra por ambiente.
 
-O plano tem um **envelope** e um **teto**. Ao bater o teto, o app pausa ou sobe de
-tamanho, conforme o que o usuário escolheu quando criou o app.
+**Quem paga é o saldo da conta, e não o plano.** O usuário recarrega crédito no
+painel (Pix ou cartão), e cada app consome dele hora a hora, item por item. O
+plano é só o tamanho do envelope — o que você pode provisionar sem perguntar.
+Acabou o saldo, há três dias de carência e depois **todos** os apps da conta
+pausam; nada é apagado, e recarregar religa. `current_cost` diz o saldo e o
+**fôlego** (quantos dias ele dura no ritmo atual). Quando qualquer ferramenta
+vier com um aviso de saldo, repasse na hora, com o link do painel — quem está
+secando raramente pergunta pelo custo.
 
 ## Ferramentas
+
+Se as ferramentas `mcp__bridgeai__*` não estiverem carregadas, o usuário ainda
+não entrou nesta máquina: rode `/bridgeai:entrar`. Não há outro caminho, e
+nenhum passa por colar token no chat.
 
 Estas dezesseis existem hoje. **Chame só o que está nesta tabela** — se você tiver
 dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arquivo.

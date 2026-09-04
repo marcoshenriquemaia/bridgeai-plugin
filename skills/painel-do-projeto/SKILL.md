@@ -1,28 +1,24 @@
 ---
 name: painel-do-projeto
-description: Como criar um painel administrativo ou de métricas na BridgeAI — o manifesto declarativo, o que ele cobre, e como fazer botões que executam regra de negócio sem abrir mão da validação. Use quando o usuário quiser gerenciar dados (produtos, pedidos, cadastros), ver números do projeto, ou pedir um CMS, admin, dashboard ou área administrativa.
+description: Como fazer um painel administrativo ou de métricas para um projeto hospedado na BridgeAI — onde ele mora, o que não pode ir para o navegador, e como fazer botões que executam regra de negócio sem abrir mão da validação. Use quando o usuário quiser gerenciar dados (produtos, pedidos, cadastros), ver números do projeto, ou pedir um CMS, admin, dashboard ou área administrativa.
 ---
 
 # Painel do projeto
 
 O usuário quase sempre precisa de duas coisas: **mexer nos dados** (cadastrar
 produto, mudar preço, ver pedido) e **ver números** (quantas vendas, quantos
-cadastros). A BridgeAI gera os dois a partir do schema do banco.
+cadastros).
 
-## Você descreve, a plataforma executa
+⚠️ **A BridgeAI não gera painel.** Não existe `publicar_dashboard`, manifesto nem
+endereço `-admin` — a versão anterior desta skill descrevia um produto que nunca
+foi construído. O painel é código do app dele, e quem escreve é você.
 
-Você **não escreve código de servidor** para o painel. Você escreve um manifesto:
-quais consultas, quais componentes, quais permissões. A BridgeAI valida as consultas
-— tabelas permitidas, limite obrigatório, só leitura por padrão — e renderiza.
+## Onde ele mora
 
-Isso não é limitação de expressividade: você compõe qualquer combinação de tabela,
-gráfico, indicador e formulário, com qualquer consulta que passe na validação. É
-limitação de *superfície*, e é o que impede que um painel gerado automaticamente
-vire uma porta aberta para o banco de um cliente.
-
-Fluxo: leia o schema com `describe_app`, monte o manifesto, chame
-`publicar_dashboard`. Sai em `<app>-admin.bridgeaibrasil.com.br`, com login e papéis próprios,
-separado da autenticação do app.
+Dentro do próprio app, numa rota `/admin`, no mesmo repositório e na mesma
+publicação. Sem segundo serviço, sem segundo domínio, sem custo novo — e diga isso a
+ele: **não custa nada a mais**. Leia o schema com `describe_app` antes de desenhar,
+em vez de perguntar o que existe no banco.
 
 ## Comece pelo que ele falou
 
@@ -31,29 +27,30 @@ produtos e ver os pedidos" — faça exatamente isso, bem-feito. Tabela de produ
 busca, formulário de edição, lista de pedidos com filtro. Mais telas depois, se ele
 pedir.
 
-Campo de imagem usa upload assinado direto para o armazenamento. Nunca coloque
-credencial de bucket no navegador.
+## As três regras que não mudam
+
+- **Login próprio, separado do login dos clientes do site.** Quem entra no painel é
+  o dono e quem ele autorizar; um cliente da loja nunca pode chegar lá por ter conta
+  na loja.
+- **Toda consulta passa pelo servidor do app**, com limite de linhas e validação
+  do que veio do formulário. O navegador nunca fala com o banco, e o painel nunca
+  monta SQL a partir de texto digitado.
+- **Imagem sobe pelo armazenamento do app, por URL assinada.** O servidor pede a
+  URL à plataforma (o contêiner já tem `STORAGE_TOKEN` e `STORAGE_SIGN_URL` no
+  ambiente) e entrega ao navegador, que sobe o arquivo direto. Credencial de
+  armazenamento nunca vai ao navegador — o app nem tem uma.
 
 ## Quando o botão precisa fazer algo de verdade
 
 "Marcar como enviado" que também baixa estoque e dispara e-mail não é edição de
-registro, é regra de negócio. O painel **não** executa isso.
-
-O botão chama um endpoint do app dele — `POST /api/admin/pedidos/:id/enviar` — e a
-regra fica no código do projeto, onde você escreve à vontade e onde ela pertence.
-Declare o botão no manifesto apontando para a rota, e implemente a rota no app.
-
-Essa separação é o que mantém o painel seguro: ele mostra dados e dispara ações
-nomeadas, nunca executa lógica arbitrária com acesso ao banco.
-
-## Versione
-
-Todo manifesto publicado vira uma versão. Se uma mudança quebrar o painel, o usuário
-volta em um clique. Diga isso a ele quando publicar a primeira vez — saber que dá
-para desfazer é o que faz alguém não-técnico ter coragem de pedir mudanças.
+registro, é regra de negócio. Ela mora num endpoint do app —
+`POST /api/admin/pedidos/:id/enviar` — com a mesma autenticação do painel, e o
+botão só chama a rota. Regra de negócio dentro do componente da tela é regra que a
+próxima tela reescreve diferente.
 
 ## Ao entregar
 
-Mande o endereço e diga o que ele consegue fazer ali, em uma frase por tela. Não
-explique o manifesto, não mostre a consulta, não fale em schema. Ele quer saber que
+Publique como qualquer mudança (a Action do repositório), confira com `status`, e
+mande o endereço dizendo o que ele consegue fazer ali, em uma frase por tela. Não
+explique a rota, não mostre a consulta, não fale em schema. Ele quer saber que
 consegue cadastrar produto e ver quem comprou.

@@ -48,14 +48,16 @@ linhas:
 > Você publicando para o testador: chega em 20 segundos, sem seu computador ligado,
 > e todo mundo vê.
 
-## A página de teste
+## Como o testador recebe
 
-Não gere um QR novo a cada rodada e não mande arquivo por mensagem. Depois de
-construir, chame `registrar_build` — a BridgeAI publica em `<app>.bridgeaibrasil.com.br/testar`
-uma página fixa com o QR atual, o link de instalação, o histórico de versões com
-retorno para a anterior, e o que mudou.
+Não gere um QR novo a cada rodada e não mande arquivo por mensagem. Um build de
+teste (`eas build --profile preview`) ganha uma página no expo.dev com o QR e o link
+de instalação, e as atualizações por ar chegam nela sem build novo.
 
 **Ele manda esse link uma vez para os testadores e nunca mais precisa mandar nada.**
+
+⚠️ Não existe `registrar_build` nem uma página `/testar` na BridgeAI — a versão
+anterior desta skill prometia as duas. O histórico de versões é o do EAS.
 
 ## Contas
 
@@ -63,9 +65,9 @@ Só a partir da homologação existe conta no Expo, e ela é **dele**, não da B
 cada conta traz o próprio plano gratuito. Entra com GitHub, a mesma do resto:
 `eas login -b` abre o navegador.
 
-O build roda a partir da máquina dele, com `--no-wait`. O comando envia o projeto,
-a construção acontece nos servidores do Expo, e você registra a versão pelo MCP. A
-BridgeAI não guarda credencial do Expo.
+O build roda a partir da máquina dele, com `--no-wait`. O comando envia o projeto e
+a construção acontece nos servidores do Expo. A BridgeAI não guarda credencial do
+Expo, e não participa do build.
 
 Conta da Apple (US$ 99/ano) e do Google Play (US$ 25) só aparecem na hora de
 publicar nas lojas, e são dele — o app sai no nome dele.
