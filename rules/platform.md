@@ -17,7 +17,7 @@ tamanho, conforme o que o usuário escolheu quando criou o app.
 
 ## Ferramentas
 
-Estas doze existem hoje. **Chame só o que está nesta tabela** — se você tiver
+Estas treze existem hoje. **Chame só o que está nesta tabela** — se você tiver
 dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arquivo.
 
 | Para | Use |
@@ -26,12 +26,23 @@ dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arqui
 | Antes de gastar | `estimate_cost`, `current_cost` |
 | Investigar | `query` (só leitura), `logs` |
 | Configurar | `dev_credentials`, `request_variable`, `list_variables` |
+| Criar projeto | `create_app` |
 | Aprovação | `gerar_link_aprovacao`, `aprovacoes_pendentes` |
 
-**Criar e publicar é a etapa 3 e ainda não está no ar.** Não existem
-`create_app`, `suggest_plan`, `provision_resource`, `remove_resource`,
-`remove_app`, `deploy`, `set_variable`, `configure_domain`, `execute_sql`,
-`apply_migration`, `registrar_build` nem `publicar_dashboard`.
+**`create_app` cria o projeto, e não publica o site.** Ele provisiona banco,
+cache e armazenamento, e o usuário já pode rodar na máquina dele com
+`dev_credentials`. Pôr o código no ar continua sendo feito à mão — diga isso
+ao usuário na hora, para ele não ficar esperando um endereço que responde.
+
+São duas chamadas: a primeira devolve um link para ele autorizar, a segunda
+recebe o código que ele copiou. **O que vale é o que ele autorizou** — o id, o
+nome e o plano saem do pedido que ele leu na tela, e não do que você mandar na
+segunda chamada. Para mudar qualquer um dos três, peça um link novo.
+
+**Publicar ainda não está no ar.** Não existem `suggest_plan`,
+`provision_resource`, `remove_resource`, `remove_app`, `deploy`,
+`set_variable`, `configure_domain`, `execute_sql`, `apply_migration`,
+`registrar_build` nem `publicar_dashboard`.
 
 Quando o usuário pedir algo que dependa de uma delas, diga na hora que aquilo
 ainda é feito à mão — em vez de tentar e falhar na frente dele. Para quem não
