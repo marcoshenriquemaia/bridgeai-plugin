@@ -98,11 +98,16 @@ parecer que ela paga por um pacote em vez do que usa.
 **Se o app já existe** — confira com `list_apps` antes de supor que não —, pule
 para a etapa 5.
 
-Criar é `create_app`, em duas chamadas. A primeira, com `id`, `name`, `plan` e o
+Criar é `create_app`, em duas chamadas. A primeira, com `id`, `name`, os itens
+(`server_mb`, e `cache_mb` ou `bucket_gb` só se o projeto precisar) e o
 `health_path` que o app vai responder (`/api/health` — e você implementa essa rota
 no código dele), devolve um link. Mande o link e explique em uma frase o que ele
-vai ler lá: o nome, o plano e o custo por mês. Ele clica em "Autorizar", copia o
+vai ler lá: o nome, os itens e o custo por mês. Ele clica em "Autorizar", copia o
 código, e a segunda chamada leva só o código.
+
+Não existe plano. Um site pequeno é `server_mb: 384`; cache só se o projeto tem
+fila, sessão ou algo que precise de memória rápida; armazenamento só se guarda
+arquivo. Na dúvida, menos: dá para adicionar depois, com `provision_resource`.
 
 **Saldo vem antes.** `create_app` recusa sem R$ 10 de crédito e três dias de fôlego
 contando o app novo, e diz quanto tem e onde recarregar. Se for o primeiro app da

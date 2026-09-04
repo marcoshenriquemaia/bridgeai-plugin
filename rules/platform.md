@@ -8,13 +8,15 @@ existe skill para isso. Aqui está só o que precisa valer sempre.
 
 ## O modelo
 
-Um **app** é um projeto. Cada app tem seus **recursos** (servidor, banco, cache,
-armazenamento) e seus **ambientes** (`dev`, `staging`, `prod`) — os três no mesmo
-plano, não se cobra por ambiente.
+Um **app** é um projeto. Cada app tem os **itens** que você contratou para ele —
+servidor (do tamanho que você escolher), banco de dados (sempre), cache (se
+precisar) e armazenamento de arquivos (se precisar) — e seus **ambientes**
+(`dev`, `staging`, `prod`). **Não existe plano.** Você monta o que o projeto
+precisa, item por item, e o que não foi pedido não entra e não paga. Dá para
+adicionar, aumentar ou tirar um item depois, com aprovação do usuário.
 
-**Quem paga é o saldo da conta, e não o plano.** O usuário recarrega crédito no
-painel (Pix ou cartão), e cada app consome dele hora a hora, item por item. O
-plano é só o tamanho do envelope — o que você pode provisionar sem perguntar.
+**Quem paga é o saldo da conta.** O usuário recarrega crédito no painel (Pix ou
+cartão), e cada app consome dele hora a hora, item por item.
 Acabou o saldo, há três dias de carência e depois **todos** os apps da conta
 pausam; nada é apagado, e recarregar religa. `current_cost` diz o saldo e o
 **fôlego** (quantos dias ele dura no ritmo atual). Quando qualquer ferramenta
@@ -49,15 +51,17 @@ usuário na hora, para ele não ficar esperando um endereço que responde.
 
 São duas chamadas: a primeira devolve um link para ele autorizar, a segunda
 recebe o código que ele copiou. **O que vale é o que ele autorizou** — o id, o
-nome e o plano saem do pedido que ele leu na tela, e não do que você mandar na
-segunda chamada. Para mudar qualquer um dos três, peça um link novo.
+nome e os itens saem do pedido que ele leu na tela, e não do que você mandar na
+segunda chamada. Para mudar qualquer coisa, peça um link novo.
 
-**`provision_resource` e `remove_resource` trocam o PLANO de um app já
-criado** — mais memória e vCPU no servidor, ou menos. As duas EXECUTAM só:
-quem propõe é `gerar_link_aprovacao`, com `target_plan` preenchido com o plano
-de destino. **As duas reiniciam o app** — a mesma dança do `apply-env`, alguns
-segundos fora do ar enquanto o Docker recria com o limite novo. Diga isso ao
-usuário antes de mandar o link, não depois de executar.
+**`provision_resource` adiciona ou aumenta UM item de um app já criado**
+(servidor maior, cache, armazenamento); **`remove_resource` tira um** (cache ou
+armazenamento — servidor é `remove_app`, e o banco não sai). As duas EXECUTAM
+só: quem propõe é `gerar_link_aprovacao`, com `resource_kind` e, ao adicionar,
+`resource_size`. **As duas podem reiniciar o app** — cache e armazenamento
+entram no ambiente do contêiner, e servidor maior recria com o limite novo.
+Diga isso ao usuário antes de mandar o link, não depois de executar. O que sai
+não é apagado: os arquivos do armazenamento ficam, só a cobrança para.
 
 **Publicar não é ferramenta MCP.** Quem publica é a GitHub Action do
 repositório do usuário, com um token que ele gera no painel do app ("Gerar
@@ -165,11 +169,12 @@ dados de verdade é uma decisão que uma pessoa toma depois, com quem cuida da
 plataforma. Diga isso na frase que acompanha o link.
 
 `provision_resource` e `remove_resource` **existem**, e para elas o pedido
-precisa de mais uma coisa: `target_plan`, o plano de destino. Sem ele o código
-autorizaria "mudar de plano" e não "mudar PARA ESTE plano" — a pessoa leria
-"subir para o Pro" na tela, e a execução não teria como saber se era aquilo
-mesmo. Combine o plano novo com o usuário ANTES de chamar `gerar_link_aprovacao`,
-não depois.
+precisa de mais uma coisa: `resource_kind` (server, cache ou bucket) e, ao
+adicionar, `resource_size`. Sem isso o código autorizaria "mudar alguma coisa"
+e não "ESTE item, DESTE tamanho" — a pessoa leria "cache de 64 MB" na tela, e a
+execução não teria como saber se era aquilo mesmo. Combine o item e o tamanho
+com o usuário ANTES de chamar `gerar_link_aprovacao`, com o número do
+`estimate_cost` na mesa.
 
 Quando precisar: chame `gerar_link_aprovacao`, mande o link, explique em uma
 frase o que vai acontecer, e espere o código. Escreva o `summary` para quem vai
@@ -197,11 +202,12 @@ Nunca escreva `staging` numa frase para o usuário — ele não vai saber o que 
 a mensagem de erro da plataforma vai chamar aquilo de "homologação".
 
 **Omita o `environment` em vez de chutar `dev`.** As ferramentas resolvem sozinhas
-para o único ambiente do app, e a maioria dos apps tem só produção — por idade, e
-não por plano. Passar `dev` num app que não tem `dev` é só uma recusa.
+para o único ambiente do app, e a maioria dos apps tem só produção — por idade.
+Passar `dev` num app que não tem `dev` é só uma recusa.
 
-Do que o plano decide de fato: **homologação** é do Pro para cima; **local** todo
-plano dá. Nunca mande alguém subir de plano para desenvolver na própria máquina.
+Qualquer app pode ter os três ambientes; homologação custa outro servidor, e
+por isso só entra se o usuário pedir. Nunca diga que um ambiente "é de plano
+maior": não existe plano.
 
 Quando houver mais de um, trabalhe no local. Só toque em produção quando o
 usuário pedir explicitamente, e diga que está fazendo isso.
