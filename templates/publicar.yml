@@ -1,0 +1,106 @@
+# Publica este projeto na BridgeAI.
+#
+# Copie para `.github/workflows/publicar.yml` no repositório do projeto.
+#
+# ## O que ele faz, e por que assim
+#
+# **A BridgeAI não busca o código de ninguém.** Este repositório é seu; a
+# plataforma nunca pede permissão para lê-lo. Quem empurra é este workflow, que
+# roda na sua conta, com um token que vale só para o seu app — e para nada além
+# de publicar nele.
+#
+# **Quem compila é esta Action, e não a nossa máquina.** A VM da BridgeAI é
+# dividida com outros projetos, e um `docker build` come CPU e disco de todos
+# eles. Aqui o build é seu, sai de graça no GitHub, e o que sobe é a imagem
+# pronta.
+#
+# ## O que você precisa configurar, uma vez
+#
+# Um segredo, em Settings → Secrets and variables → Actions:
+#
+#   BRIDGEAI_DEPLOY_TOKEN   o token que a BridgeAI te deu (começa com bai_deploy_)
+#
+# ## A etiqueta da imagem não é escolha sua, e isso é de propósito
+#
+# A plataforma devolve uma etiqueta por publicação, e o `docker load` do lado de
+# lá recusa qualquer outra. É o que impede uma imagem etiquetada com o nome de
+# um serviço da plataforma de substituí-lo ao ser carregada — `docker load` não
+# pergunta de quem é a etiqueta, ele obedece.
+
+name: Publicar na BridgeAI
+
+on:
+  push:
+    branches: [main]
+  # Um botão em Actions, para publicar sem precisar de um commit novo.
+  workflow_dispatch:
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    # Duas publicações do mesmo app ao mesmo tempo terminam com dois `docker
+    # load` e duas recriações do mesmo contêiner. O lado da plataforma recusa a
+    # segunda, mas recusar depois de subir 200 MB é gastar à toa.
+    concurrency:
+      group: bridgeai-publicar-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compilar a imagem
+        run: docker build -t projeto-local:${{ github.sha }} .
+
+      - name: Pedir onde subir
+        id: destino
+        env:
+          TOKEN: ${{ secrets.BRIDGEAI_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+          resposta=$(curl -sS -X POST https://mcp.bridgeaibrasil.com.br/deploy/upload-url \
+            -H "authorization: Bearer $TOKEN" \
+            -H 'content-type: application/json' \
+            -d "{\"environment\":\"prod\",\"commit\":\"${{ github.sha }}\",\"ref\":\"${{ github.ref }}\"}")
+
+          # O `jq -e` sai diferente de zero quando o campo não existe: sem ele,
+          # um erro da plataforma viraria uma variável vazia e o passo seguinte
+          # falharia falando de outra coisa.
+          echo "id=$(echo "$resposta" | jq -er .deployId)"  >> "$GITHUB_OUTPUT"
+          echo "tag=$(echo "$resposta" | jq -er .imageTag)" >> "$GITHUB_OUTPUT"
+          # A URL assinada NÃO vai para o $GITHUB_OUTPUT: ela é a credencial, e
+          # output de passo aparece no log da execução.
+          echo "$resposta" | jq -er .uploadUrl > /tmp/upload-url
+
+      - name: Empacotar e subir
+        run: |
+          set -euo pipefail
+          docker tag projeto-local:${{ github.sha }} '${{ steps.destino.outputs.tag }}'
+          # `docker save` já entrega as camadas comprimidas: um `gzip` por cima
+          # ganha menos de 1% — medido em 04/09/2026 numa imagem de 214 MB.
+          docker save '${{ steps.destino.outputs.tag }}' -o /tmp/imagem.tar
+          ls -lh /tmp/imagem.tar
+
+          # `--upload-file` põe o `Content-Length` sozinho, que a URL assinada
+          # exige. Um `-d @arquivo` mandaria em `chunked` e a Magalu recusaria.
+          curl -sS --fail-with-body -X PUT --upload-file /tmp/imagem.tar "$(cat /tmp/upload-url)"
+
+      - name: Publicar
+        env:
+          TOKEN: ${{ secrets.BRIDGEAI_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+          # A chamada só volta no fim: ela carrega a imagem, troca o contêiner e
+          # espera o app atender. É por isso que ela demora, e é por isso que um
+          # verde aqui quer dizer que o site está no ar.
+          curl -sS --fail-with-body --max-time 900 \
+            -X POST https://mcp.bridgeaibrasil.com.br/deploy \
+            -H "authorization: Bearer $TOKEN" \
+            -H 'content-type: application/json' \
+            -d "{\"deployId\":\"${{ steps.destino.outputs.id }}\"}" | tee /tmp/resultado.json
+
+          # `healthy: false` não é falha de publicação — a imagem subiu e o
+          # contêiner está de pé. É aviso: o app não respondeu no caminho de
+          # saúde dentro do prazo, e quem publicou precisa ver isso no log.
+          if [ "$(jq -r .healthy /tmp/resultado.json)" != "true" ]; then
+            echo "::warning::$(jq -r .warning /tmp/resultado.json)"
+          fi
