@@ -17,7 +17,7 @@ tamanho, conforme o que o usuário escolheu quando criou o app.
 
 ## Ferramentas
 
-Estas treze existem hoje. **Chame só o que está nesta tabela** — se você tiver
+Estas quinze existem hoje. **Chame só o que está nesta tabela** — se você tiver
 dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arquivo.
 
 | Para | Use |
@@ -27,6 +27,7 @@ dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arqui
 | Investigar | `query` (só leitura), `logs` |
 | Configurar | `dev_credentials`, `request_variable`, `list_variables` |
 | Criar projeto | `create_app` |
+| Mudar de plano | `provision_resource` (sobe), `remove_resource` (desce) |
 | Aprovação | `gerar_link_aprovacao`, `aprovacoes_pendentes` |
 
 **`create_app` cria o projeto, e não publica o site.** Ele provisiona banco,
@@ -39,9 +40,15 @@ recebe o código que ele copiou. **O que vale é o que ele autorizou** — o id,
 nome e o plano saem do pedido que ele leu na tela, e não do que você mandar na
 segunda chamada. Para mudar qualquer um dos três, peça um link novo.
 
-**Publicar ainda não está no ar.** Não existem `suggest_plan`,
-`provision_resource`, `remove_resource`, `remove_app`, `deploy`,
-`set_variable`, `configure_domain`, `execute_sql`, `apply_migration`,
+**`provision_resource` e `remove_resource` trocam o PLANO de um app já
+criado** — mais memória e vCPU no servidor, ou menos. As duas EXECUTAM só:
+quem propõe é `gerar_link_aprovacao`, com `target_plan` preenchido com o plano
+de destino. **As duas reiniciam o app** — a mesma dança do `apply-env`, alguns
+segundos fora do ar enquanto o Docker recria com o limite novo. Diga isso ao
+usuário antes de mandar o link, não depois de executar.
+
+**Publicar ainda não está no ar.** Não existem `suggest_plan`, `remove_app`,
+`deploy`, `set_variable`, `configure_domain`, `execute_sql`, `apply_migration`,
 `registrar_build` nem `publicar_dashboard`.
 
 Quando o usuário pedir algo que dependa de uma delas, diga na hora que aquilo
@@ -105,19 +112,26 @@ provisionamento é que não sabia criá-lo, e isso se resolve sem trocar de plan
 
 ## Operação sem volta exige código de aprovação
 
-⚠️ **Nenhuma dessas operações existe hoje**, então hoje não há o que aprovar. O
-`gerar_link_aprovacao` recusa e diz isso — não tente contornar, e não mande link
-nenhum. Fazer alguém ler "apagar o projeto inteiro, não tem como desfazer",
-respirar fundo, clicar em "Autorizar" e copiar um código para nada é pior do que
-dizer, na hora, que aquilo ainda é feito à mão. O resto desta seção descreve o
-mecanismo, que está de pé esperando as ferramentas.
-
 `execute_sql`, `apply_migration`, `remove_resource`, `remove_app` e
 `provision_resource` exigem `approval_token` — um código que o usuário copia do
 painel da BridgeAI. **Você não consegue gerá-lo**: o `gerar_link_aprovacao`
 devolve um link, e o código só passa a existir quando uma pessoa aperta
 "Autorizar" na tela dela. É isso que impede uma instrução vinda de um log de
 destruir dados: quem pediu e quem autorizou não são o mesmo canal.
+
+⚠️ **`execute_sql`, `apply_migration` e `remove_app` não existem hoje**, então
+hoje não há o que aprovar para elas. O `gerar_link_aprovacao` recusa e diz
+isso — não tente contornar, e não mande link nenhum. Fazer alguém ler "apagar
+o projeto inteiro, não tem como desfazer", respirar fundo, clicar em
+"Autorizar" e copiar um código para nada é pior do que dizer, na hora, que
+aquilo ainda é feito à mão.
+
+`provision_resource` e `remove_resource` **existem**, e para elas o pedido
+precisa de mais uma coisa: `target_plan`, o plano de destino. Sem ele o código
+autorizaria "mudar de plano" e não "mudar PARA ESTE plano" — a pessoa leria
+"subir para o Pro" na tela, e a execução não teria como saber se era aquilo
+mesmo. Combine o plano novo com o usuário ANTES de chamar `gerar_link_aprovacao`,
+não depois.
 
 Quando precisar: chame `gerar_link_aprovacao`, mande o link, explique em uma
 frase o que vai acontecer, e espere o código. Escreva o `summary` para quem vai
