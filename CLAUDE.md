@@ -129,8 +129,10 @@ instalação de verdade pelo marketplace, e ela depende do repositório público
 
 ## Ainda falta
 
-- **Publicar**: o repositório `marcoshenriquemaia/bridgeai-plugin` que o
-  `plugin.json` e o README apontam **não existe**, e este `plugin/` mora num
-  repositório privado. Hoje ninguém consegue instalar.
+- **Instalar de verdade** pelo marketplace numa máquina limpa, e rodar
+  `/bridgeai:entrar` → `/bridgeai:comecar` até o app no ar. O repositório é
+  público desde 04/09/2026 (`marcoshenriquemaia/bridgeai-plugin`), e no
+  repositório da plataforma esta pasta é um submódulo: commit e push aqui
+  primeiro, ponteiro lá depois.
 - Skill de domínio próprio (a feature não existe no servidor; a skill vem depois)
 - Teste do `load-platform.js` e do `tunnel.js`, no formato do `hooks.test.js`
