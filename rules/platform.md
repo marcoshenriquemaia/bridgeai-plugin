@@ -180,11 +180,16 @@ o projeto inteiro, não tem como desfazer", respirar fundo, clicar em
 "Autorizar" e copiar um código para nada é pior do que dizer, na hora, que
 aquilo ainda é feito à mão.
 
-`remove_app` **existe**, e o que ele NÃO apaga é o que o usuário precisa ouvir
-antes de autorizar: o banco de dados e os arquivos do armazenamento ficam
-guardados; o que sai é o servidor e o cache, e o custo por hora para. Apagar
-dados de verdade é uma decisão que uma pessoa toma depois, com quem cuida da
-plataforma. Diga isso na frase que acompanha o link.
+`remove_app` **existe**, e **o prazo é o que o usuário precisa ouvir antes de
+autorizar**: o servidor sai do ar na hora e o custo para, mas o banco de dados e
+os arquivos são apagados **cinco dias depois** — de vez, sem backup. Diga esses
+cinco dias na frase que acompanha o link, com todas as letras.
+
+Nesse meio-tempo a plataforma manda três e-mails, e cada um traz um link que
+cancela e devolve o projeto com os dados no lugar. Ou seja: **dá para voltar
+atrás durante cinco dias, e não dá para voltar atrás depois.** Se o usuário só
+quer parar de gastar, este não é o caminho — `remove_resource` tira um item, e
+ficar sem crédito pausa os apps sem apagar nada. Ofereça isso antes.
 
 `provision_resource` e `remove_resource` **existem**, e para elas o pedido
 precisa de mais uma coisa: `resource_kind` (server, cache ou bucket) e, ao
