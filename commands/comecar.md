@@ -105,7 +105,7 @@ no código dele), devolve um link. Mande o link e explique em uma frase o que el
 vai ler lá: o nome, os itens e o custo por mês. Ele clica em "Autorizar", copia o
 código, e a segunda chamada leva só o código.
 
-Não existe plano. Um site pequeno é `server_mb: 384`; cache só se o projeto tem
+Não existe plano. Um site pequeno é `server_mb: 512`; cache só se o projeto tem
 fila, sessão ou algo que precise de memória rápida; armazenamento só se guarda
 arquivo. Na dúvida, menos: dá para adicionar depois, com `provision_resource`.
 
