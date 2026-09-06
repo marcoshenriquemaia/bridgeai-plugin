@@ -86,7 +86,7 @@ dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arqui
 | Investigar | `query` (só leitura), `logs` |
 | Configurar | `dev_credentials`, `request_variable`, `list_variables` |
 | Criar projeto | `create_app` |
-| Mudar de plano | `provision_resource` (sobe), `remove_resource` (desce) |
+| Mudar os itens | `provision_resource` (adiciona ou aumenta, inclusive AMBIENTE), `remove_resource` (tira) |
 | Apagar projeto | `remove_app` |
 | Aprovação | `gerar_link_aprovacao`, `aprovacoes_pendentes` |
 
@@ -102,13 +102,23 @@ nome e os itens saem do pedido que ele leu na tela, e não do que você mandar n
 segunda chamada. Para mudar qualquer coisa, peça um link novo.
 
 **`provision_resource` adiciona ou aumenta UM item de um app já criado**
-(servidor maior, cache, armazenamento); **`remove_resource` tira um** (cache ou
-armazenamento — servidor é `remove_app`, e o banco não sai). As duas EXECUTAM
-só: quem propõe é `gerar_link_aprovacao`, com `resource_kind` e, ao adicionar,
-`resource_size`. **As duas podem reiniciar o app** — cache e armazenamento
-entram no ambiente do contêiner, e servidor maior recria com o limite novo.
-Diga isso ao usuário antes de mandar o link, não depois de executar. O que sai
-não é apagado: os arquivos do armazenamento ficam, só a cobrança para.
+(servidor maior, cache, armazenamento e **ambiente**); **`remove_resource` tira
+um** (cache ou armazenamento — servidor é `remove_app`, e ambiente não sai por
+aqui). As duas EXECUTAM só: quem propõe é `gerar_link_aprovacao`, com
+`resource_kind` e, ao adicionar, `resource_size` — ou `environment`, quando o
+item é um ambiente. **As duas podem reiniciar o app** — cache e armazenamento
+entram no ambiente do contêiner, e servidor maior recria com o limite novo;
+ambiente novo não reinicia nada. Diga isso ao usuário antes de mandar o link,
+não depois de executar. O que sai não é apagado: os arquivos do armazenamento
+ficam, só a cobrança para.
+
+**É assim que um projeto ganha produção.** Um app nasce só com a máquina de
+desenvolvimento. Quando o usuário tiver o que publicar, chame `estimate_cost`
+com `kind: "database"` e `environment: "prod"`, diga o número, e peça o link
+com `resource_kind: "database"` e `environment: "prod"`. Publicar exige
+servidor: se o app não tiver um, ele precisa entrar também — são dois pedidos,
+e os dois custam. O ambiente novo nasce com um banco vazio, e o endereço só
+responde depois da primeira publicação pela Action.
 
 **Publicar não é ferramenta MCP.** Quem publica é a GitHub Action do
 repositório do usuário — e **não há segredo nenhum para configurar lá**. A
@@ -285,7 +295,15 @@ maior": não existe plano.
 R$ 39/mês cada. Não é taxa de plataforma: é um banco de dados de verdade, com as
 credenciais dele, separado dos outros — que é o que faz você poder derrubar tudo
 no local sem encostar em produção. Ao propor um ambiente novo, chame
-`estimate_cost` e diga o número, como em qualquer outro item.
+`estimate_cost` com `kind: "database"` e `environment`, e diga o número, como em
+qualquer outro item. **Sem `environment` ele responde o que o app já paga de
+banco, e não uma cotação.**
+
+**Acrescentar um ambiente é `provision_resource`** com `resource_kind:
+"database"` — ver acima. **Tirar um, não existe**: apagar o banco de um ambiente
+apagaria os dados dele, e o único caminho de eliminação da plataforma é
+`remove_app`, com cinco dias e três avisos. Se o usuário quiser desligar só um
+ambiente, diga que isso passa pelo suporte.
 
 Quando houver mais de um, trabalhe no local. Só toque em produção quando o
 usuário pedir explicitamente, e diga que está fazendo isso.

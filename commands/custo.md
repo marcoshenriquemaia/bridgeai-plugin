@@ -33,8 +33,14 @@ boa, não uma resposta vazia.
 
 **Ambiente parado é a linha mais fácil de esquecer.** Cada ambiente é um banco de
 dados próprio e custa cerca de R$ 39/mês. Homologação que ninguém abre há um mês
-é dinheiro correndo — diga o valor e ofereça tirar. O ambiente local do usuário,
-não: é onde ele desenvolve.
+é dinheiro correndo — **diga o valor**. O ambiente local do usuário, não: é onde
+ele desenvolve.
+
+⚠️ **Mas não ofereça tirar: a plataforma não sabe.** Apagar o banco de um
+ambiente apagaria os dados dele, e o único caminho de eliminação é `remove_app`,
+que leva o projeto inteiro. Mostrar o número e dizer que reduzir aquilo passa
+pelo suporte é honesto; prometer o corte e descobrir na hora que não dá é o
+gesto que faz alguém parar de confiar na conta.
 
 ## Se o projeto for de um cliente
 

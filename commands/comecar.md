@@ -178,9 +178,15 @@ O túnel **não abre para produção**, de propósito: o banco de quem está usa
 dele não vem para a máquina de ninguém. Num app que só tem produção não há para onde
 tunelar.
 
-Nesse caso **não invente um contorno**. Diga o que dá para fazer: escrever o código,
-publicar, e olhar o resultado no endereço do app. `status`, `logs` e `query`
-investigam lá, que é para isso que existem.
+**O conserto é acrescentar o ambiente local**, e ele é uma chamada: `estimate_cost`
+com `kind: "database"` e `environment: "dev"`, o número na mesa, e
+`gerar_link_aprovacao` + `provision_resource` com `resource_kind: "database"` e
+`environment: "dev"`. Custa cerca de R$ 39/mês, nasce vazio, e não reinicia o site
+dele. Diga o preço antes — é uma linha nova na conta, não um ajuste.
+
+Se ele não quiser pagar por isso, **não invente um contorno**. Diga o que dá para
+fazer: escrever o código, publicar, e olhar o resultado no endereço do app.
+`status`, `logs` e `query` investigam lá, que é para isso que existem.
 
 ⚠️ **Não culpe o plano.** O ambiente local vem em todos, Starter incluído. Um app
 sem ele foi publicado antes de o provisionamento saber criá-lo — dizer "é do plano
