@@ -119,6 +119,12 @@ O que nasce: banco, cache, armazenamento e o ambiente local. **O site NÃO fica 
 aqui** — publicar é a etapa 7. Diga isso na hora, para ele não abrir o endereço e
 achar que quebrou.
 
+**O ambiente local é do USUÁRIO, e não do projeto.** No primeiro projeto ele
+nasce junto e custa cerca de R$ 39/mês na conta dele; **do segundo projeto em
+diante é de graça** — o mesmo ambiente serve todos. Diga isso quando ele criar o
+segundo: é a diferença entre achar que vai pagar de novo e criar quantos projetos
+quiser.
+
 ## Etapa 5 — Trazer para a máquina
 
 A pasta é `%USERPROFILE%\BridgeAI\<nome-do-app>` no Windows, ou `~/BridgeAI/<nome>`
@@ -156,8 +162,14 @@ ainda não existe.
 projeto, que é onde o `.env` está.
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --app <app> --environment dev
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --dev
 ```
+
+**`--dev`, sem `--app`: um túnel só serve TODOS os projetos dele.** O destino é
+sempre o mesmo servidor, e o Postgres escolhe o banco na abertura da conexão — o
+`DATABASE_URL` de cada projeto já aponta para o banco dele, pela mesma porta. Se
+ele já está com um túnel aberto de outro projeto, **pule este passo**: mandar
+subir um segundo só dá "essa porta já está ocupada".
 
 Ele abre um `127.0.0.1:55432` que se comporta como um Postgres comum. Quando
 alguma coisa estiver errada (ambiente que não existe, projeto de outra pessoa,
@@ -181,16 +193,20 @@ tunelar.
 **O conserto é acrescentar o ambiente local**, e ele é uma chamada: `estimate_cost`
 com `kind: "database"` e `environment: "dev"`, o número na mesa, e
 `gerar_link_aprovacao` + `provision_resource` com `resource_kind: "database"` e
-`environment: "dev"`. Custa cerca de R$ 39/mês, nasce vazio, e não reinicia o site
-dele. Diga o preço antes — é uma linha nova na conta, não um ajuste.
+`environment: "dev"`. Nasce vazio, e não reinicia o site dele.
+
+**Diga o número que a ferramenta devolveu, e não um de cor.** Se ele já tem
+ambiente de desenvolvimento — porque tem outro projeto —, isso **não muda a conta
+dele**, e é isso que o `estimate_cost` responde. Se é o primeiro, custa cerca de
+R$ 39/mês, e aí é uma linha nova na conta.
 
 Se ele não quiser pagar por isso, **não invente um contorno**. Diga o que dá para
 fazer: escrever o código, publicar, e olhar o resultado no endereço do app.
 `status`, `logs` e `query` investigam lá, que é para isso que existem.
 
-⚠️ **Não culpe o plano.** O ambiente local vem em todos, Starter incluído. Um app
-sem ele foi publicado antes de o provisionamento saber criá-lo — dizer "é do plano
-Pro para cima" faz a pessoa pagar R$ 200 a mais por mês por algo que ela já tem.
+⚠️ **Não culpe o plano.** Não existe plano. Um app sem ambiente local foi
+publicado antes de o provisionamento saber criá-lo — dizer "é do plano Pro para
+cima" faz a pessoa pagar a mais por algo que ela já tem.
 
 ### Se o servidor local reclamar de "connection refused"
 

@@ -33,14 +33,20 @@ boa, não uma resposta vazia.
 
 **Ambiente parado é a linha mais fácil de esquecer.** Cada ambiente é um banco de
 dados próprio e custa cerca de R$ 39/mês. Homologação que ninguém abre há um mês
-é dinheiro correndo — **diga o valor**. O ambiente local do usuário, não: é onde
-ele desenvolve.
+é dinheiro correndo — **diga o valor**.
 
-⚠️ **Mas não ofereça tirar: a plataforma não sabe.** Apagar o banco de um
-ambiente apagaria os dados dele, e o único caminho de eliminação é `remove_app`,
-que leva o projeto inteiro. Mostrar o número e dizer que reduzir aquilo passa
-pelo suporte é honesto; prometer o corte e descobrir na hora que não dá é o
-gesto que faz alguém parar de confiar na conta.
+⚠️ **O ambiente local NÃO é um deles.** Ele é da conta da pessoa, aparece uma vez
+só (na tela de Custo do painel, com um card próprio) e serve todos os projetos
+dela — não é uma linha por projeto e não sai da conta de nenhum cliente. Nunca
+ofereça "cortar o ambiente local deste projeto": não é um item do projeto, e
+desativar o ambiente inteiro apaga os bancos de desenvolvimento de todos os
+projetos dela, na hora. Se ela quiser isso, é no painel, e diga o que se perde.
+
+⚠️ **E não ofereça tirar produção ou homologação: a plataforma não sabe.**
+Apagar o banco de um ambiente apagaria os dados dele, e o único caminho de
+eliminação é `remove_app`, que leva o projeto inteiro. Mostrar o número e dizer
+que reduzir aquilo passa pelo suporte é honesto; prometer o corte e descobrir na
+hora que não dá é o gesto que faz alguém parar de confiar na conta.
 
 ## Se o projeto for de um cliente
 

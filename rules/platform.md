@@ -15,13 +15,20 @@ precisar) e armazenamento de arquivos (se precisar) — e seus **ambientes**
 precisa, item por item, e o que não foi pedido não entra e não paga. Dá para
 adicionar, aumentar ou tirar um item depois, com aprovação do usuário.
 
-**Cada ambiente é um banco de dados próprio, e cada um tem preço.** Um app com
-ambiente local e produção paga duas linhas de banco, porque são dois bancos de
-verdade no servidor. Por isso **um app novo nasce só com o ambiente local** — é a
-máquina de desenvolvimento, e sozinha ela custa cerca de R$ 39/mês, uns R$ 1,30
-por dia. Produção entra quando houver o que publicar, e aí entram o servidor e o
-resto. Nunca crie produção "já que estamos aqui": é conta correndo por um site
-que ainda não existe.
+**Cada ambiente é um banco de dados próprio, e cada um tem preço** — com uma
+exceção que muda o jeito de conversar sobre isso.
+
+**O ambiente local é do USUÁRIO, não do projeto.** Ele é um só, custa cerca de
+R$ 39/mês (uns R$ 1,30 por dia) na conta da pessoa, e serve **todos** os projetos
+dela. O primeiro projeto com ambiente local liga esse ambiente e é ele que paga a
+linha; do segundo em diante o ambiente local é **de graça**. Diga isso quando o
+usuário criar o segundo projeto — é a diferença entre ele achar que vai pagar de
+novo e ele criar quantos projetos quiser.
+
+**Produção e homologação são do projeto**, e cada uma custa a sua linha de banco.
+Por isso **um app novo nasce só com o ambiente local**: produção entra quando
+houver o que publicar, e aí entram o servidor e o resto. Nunca crie produção "já
+que estamos aqui" — é conta correndo por um site que ainda não existe.
 
 **Quem paga é o saldo da conta.** O usuário recarrega crédito no painel (Pix ou
 cartão), e cada app consome dele hora a hora, item por item.
@@ -125,8 +132,8 @@ ambiente novo não reinicia nada. Diga isso ao usuário antes de mandar o link,
 não depois de executar. O que sai não é apagado: os arquivos do armazenamento
 ficam, só a cobrança para.
 
-**É assim que um projeto ganha produção.** Um app nasce só com a máquina de
-desenvolvimento. Quando o usuário tiver o que publicar, chame `estimate_cost`
+**É assim que um projeto ganha produção.** Um app nasce só com o ambiente
+local. Quando o usuário tiver o que publicar, chame `estimate_cost`
 com `kind: "database"` e `environment: "prod"`, diga o número, e peça o link
 com `resource_kind: "database"` e `environment: "prod"`. Publicar exige
 servidor: se o app não tiver um, ele precisa entrar também — são dois pedidos,
@@ -218,7 +225,7 @@ O servidor roda na máquina da pessoa; banco e armazenamento ficam na nuvem.
 **Ninguém instala Docker nem Postgres.** Quem liga as duas pontas é o túnel:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --app <app> --environment dev
+node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --dev
 ```
 
 A ordem é: **`dev_credentials` e grave o `.env` primeiro; o túnel depois**, em
@@ -233,11 +240,17 @@ sem o arquivo, ele diz "faltou o acesso"; e o `DATABASE_URL` aponta para
 `127.0.0.1`, então sem o túnel de pé o app falha com "connection refused", erro
 que não diz nada sobre o código. O passo a passo está no `/bridgeai:comecar`.
 
+**Um túnel só, para todos os projetos.** O comando é `node tunnel.js --dev`,
+sem `--app`: o ambiente local é da pessoa, o destino é sempre o mesmo servidor, e
+o Postgres escolhe o banco na abertura da conexão. Quem já está com o túnel
+aberto para outro projeto **não precisa abrir nada** — diga isso em vez de mandar
+subir um segundo.
+
 **Produção não passa pelo túnel.** Se o app não tiver ambiente local, o ciclo é
 escrever, publicar e investigar com `status`, `logs` e `query` — mas **não diga
-que isso é limitação do plano**: o ambiente local vem em todos, inclusive no
-Starter. Os apps publicados antes de setembro de 2026 só têm produção porque o
-provisionamento é que não sabia criá-lo, e isso se resolve sem trocar de plano.
+que isso é limitação do plano**: não existe plano, e acrescentar o ambiente local
+é `provision_resource` com `resource_kind: "database"` e `environment: "dev"`.
+Se o usuário já tem ambiente de desenvolvimento, isso não muda a conta dele.
 
 ## Operação sem volta exige código de aprovação
 
@@ -316,18 +329,28 @@ Qualquer app pode ter os três ambientes; homologação custa outro servidor, e
 por isso só entra se o usuário pedir. Nunca diga que um ambiente "é de plano
 maior": não existe plano.
 
-**Cada ambiente é um banco próprio e entra na conta como uma linha.** Cerca de
-R$ 39/mês cada. Não é taxa de plataforma: é um banco de dados de verdade, com as
-credenciais dele, separado dos outros — que é o que faz você poder derrubar tudo
-no local sem encostar em produção. Ao propor um ambiente novo, chame
-`estimate_cost` com `kind: "database"` e `environment`, e diga o número, como em
-qualquer outro item. **Sem `environment` ele responde o que o app já paga de
-banco, e não uma cotação.**
+**Produção e homologação são bancos do PROJETO e entram na conta como uma linha
+cada.** Cerca de R$ 39/mês. Não é taxa de plataforma: é um banco de dados de
+verdade, com as credenciais dele, separado dos outros — que é o que faz você
+poder derrubar tudo no local sem encostar em produção.
+
+**O ambiente local é da CONTA**, e por isso ele cobra uma vez só, na primeira vez
+que a pessoa cria um projeto com ele. Nunca diga que o segundo projeto vai custar
+outra linha de banco local: `estimate_cost` responde "não muda a conta" nesse
+caso, e é essa a resposta certa.
+
+Ao propor um ambiente novo, chame `estimate_cost` com `kind: "database"` e
+`environment`, e diga o número, como em qualquer outro item. **Sem `environment`
+ele responde o que o app já paga de banco, e não uma cotação.**
 
 **Acrescentar um ambiente é `provision_resource`** com `resource_kind:
-"database"` — ver acima. **Tirar um, não existe**: apagar o banco de um ambiente
-apagaria os dados dele, e o único caminho de eliminação da plataforma é
-`remove_app`, com cinco dias e três avisos. Se o usuário quiser desligar só um
+"database"` — ver acima. **Tirar um, não existe** pelas ferramentas: apagar o
+banco de um ambiente apagaria os dados dele, e o único caminho de eliminação da
+plataforma é `remove_app`, com cinco dias e três avisos. A exceção é o ambiente
+de desenvolvimento inteiro, que a pessoa desativa no painel, em Custo — e ali
+**os bancos locais de todos os projetos dela somem na hora, sem janela**. Você
+não faz isso por ela e não tem ferramenta para isso; se ela pedir, mande abrir o
+painel e diga o que se perde. Se o usuário quiser desligar só um
 ambiente, diga que isso passa pelo suporte.
 
 Quando houver mais de um, trabalhe no local. Só toque em produção quando o

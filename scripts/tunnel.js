@@ -5,7 +5,15 @@
 // nele ao banco do projeto, por dentro do WebSocket do servidor MCP. Para o
 // Prisma, o `psql` e qualquer driver, aquilo é um Postgres comum na máquina.
 //
-//   node tunnel.js --app loja-do-joao --environment dev
+//   node tunnel.js --dev                                  (todos os projetos)
+//   node tunnel.js --app loja-do-joao --environment staging (um ambiente)
+//
+// ⚠️ **`--dev` abre UM túnel para todos os seus projetos**, e é o caminho normal
+// desde 06/09/2026: o ambiente de desenvolvimento é da PESSOA, não do projeto.
+// Dá certo porque o destino é sempre o mesmo servidor e **o Postgres escolhe o
+// database na mensagem de abertura da conexão** — o `DATABASE_URL` de cada
+// projeto aponta para o banco dele, pela mesma porta. Uma porta por projeto era
+// mais um processo para rodar e mais uma coisa para explicar.
 //
 // Por que ele existe: o banco da plataforma só tem endereço interno, e publicar
 // a porta dele seria expor banco de cliente à internet. O detalhe inteiro está
@@ -100,8 +108,12 @@ function doEnvDoProjeto(chave) {
 }
 
 const opt = args(process.argv.slice(2));
-const app = opt.app;
-const environment = opt.environment || 'dev';
+// `--dev` é o modo conta: sem projeto, um túnel só. Sem `--app` e sem `--dev`
+// também cai nele, porque é o que a pessoa quer em 99% das vezes — e a recusa
+// por falta de `--app` mandava quem tem três projetos abrir três túneis.
+const modoConta = 'dev' in opt || !opt.app;
+const app = modoConta ? null : opt.app;
+const environment = modoConta ? 'dev' : opt.environment || 'dev';
 const porta = Number(opt.port || PORTA_PADRAO);
 const base = (opt.url || process.env.BRIDGEAI_MCP_URL || PADRAO_MCP).replace(/\/+$/, '');
 
@@ -119,7 +131,6 @@ function morre(mensagem) {
   process.exit(1);
 }
 
-if (!app) morre('Diga qual projeto: --app <nome-do-projeto>');
 if (!token) {
   // ⚠️ Esta mensagem dizia "rode `npm run login`" — um comando do repositório
   // PRIVADO da plataforma, que quem instalou o plugin não tem. Ela mandava a
@@ -149,9 +160,13 @@ if (!token) {
 const comCache = 'cache' in opt || doEnvDoProjeto('BRIDGEAI_TUNNEL_CACHE') !== null;
 const portaCache = Number(opt['cache-port'] || PORTA_CACHE_PADRAO);
 
+/** A query do pedido. Sem `app` é o modo conta — ver o aviso no topo. */
+const consulta = () =>
+  (app ? `app=${encodeURIComponent(app)}&` : '') +
+  `environment=${encodeURIComponent(environment)}`;
+
 const wsUrlPara = (target) =>
-  `${base.replace(/^http/, 'ws')}/tunnel` +
-  `?app=${encodeURIComponent(app)}&environment=${encodeURIComponent(environment)}&target=${target}`;
+  `${base.replace(/^http/, 'ws')}/tunnel?${consulta()}&target=${target}`;
 const wsUrl = wsUrlPara('db');
 
 /**
@@ -162,9 +177,7 @@ const wsUrl = wsUrlPara('db');
  * que dá para dizer é "não deu" — e quem está do outro lado não programa.
  */
 async function conferir(target = 'db') {
-  const url =
-    `${base}/tunnel/check` +
-    `?app=${encodeURIComponent(app)}&environment=${encodeURIComponent(environment)}&target=${target}`;
+  const url = `${base}/tunnel/check?${consulta()}&target=${target}`;
   let res;
   try {
     res = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
@@ -359,7 +372,10 @@ async function main() {
   // Só 127.0.0.1. Escutar em 0.0.0.0 poria o banco do projeto ao alcance de
   // qualquer um na mesma rede — o café, o coworking, o wi-fi do prédio.
   servidor.listen(porta, '127.0.0.1', () => {
-    console.log(`Túnel aberto: 127.0.0.1:${porta} → banco de ${app} (${environment}).`);
+    console.log(
+      `Túnel aberto: 127.0.0.1:${porta} → ` +
+        (app ? `banco de ${app} (${environment}).` : 'seu ambiente de desenvolvimento (todos os projetos).'),
+    );
     console.log('O banco da nuvem respondeu — a ligação foi conferida, e não só reservada.');
     if (!comCache) console.log('Deixe esta janela aberta enquanto estiver desenvolvendo.');
   });
@@ -384,7 +400,11 @@ async function main() {
   const servidorCache = net.createServer((local) => atende(local, wsUrlPara('cache')));
   servidorCache.on('error', (e) => morre(`Não consegui abrir a porta ${portaCache} do cache: ${e.message}`));
   servidorCache.listen(portaCache, '127.0.0.1', () => {
-    console.log(`Túnel aberto: 127.0.0.1:${portaCache} → cache de ${app} (faixa de desenvolvimento, separada da produção).`);
+    console.log(
+      `Túnel aberto: 127.0.0.1:${portaCache} → cache` +
+        (app ? ` de ${app}` : '') +
+        ' (faixa de desenvolvimento, separada da produção).',
+    );
     console.log('Deixe esta janela aberta enquanto estiver desenvolvendo.');
   });
 }
