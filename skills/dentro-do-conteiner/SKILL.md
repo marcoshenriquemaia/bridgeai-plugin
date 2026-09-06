@@ -176,9 +176,18 @@ Content-Type: application/json
   "tornar público".
 - **300 assinaturas por minuto por app.** Um laço que assina por item de lista
   estoura; assine sob demanda.
-- **O ambiente local não tem armazenamento** hoje. App que guarda arquivo
-  precisa de um caminho local alternativo (`/tmp` no local, ou pular o upload)
-  enquanto isso não existe.
+- **O ambiente local TEM armazenamento**, e é um bucket separado do de
+  produção. O `dev_credentials` escreve `STORAGE_TOKEN`, `STORAGE_SIGN_URL` e
+  `STORAGE_BUCKET` no `.env`, e o código do app é **o mesmo** nos dois: ele pede
+  URL ao `STORAGE_SIGN_URL` e sobe nela. Nada de MinIO, nada de Docker.
+
+  ⚠️ **O token do `.env` não assina no bucket de produção**, e essa recusa é de
+  propósito: rodando local você executa código pela metade, e um `PUT` de teste
+  no bucket de produção passa por cima de arquivo de gente de verdade sem erro
+  nenhum. É a mesma razão de o túnel recusar o banco de produção.
+
+  Os arquivos que você subir desenvolvendo ficam no bucket local, e **não
+  aparecem** no app publicado. Precisa de um arquivo nos dois? Suba duas vezes.
 
 ## O que não existe, e como o app contorna
 

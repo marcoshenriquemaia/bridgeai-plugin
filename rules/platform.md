@@ -221,8 +221,9 @@ um que já foi preenchido.
 
 ## Desenvolver na máquina dele
 
-O servidor roda na máquina da pessoa; banco e armazenamento ficam na nuvem.
-**Ninguém instala Docker nem Postgres.** Quem liga as duas pontas é o túnel:
+O servidor roda na máquina da pessoa; banco, cache e armazenamento ficam na
+nuvem. **Ninguém instala Docker, Postgres, Redis nem MinIO.** Quem liga as duas
+pontas é o túnel:
 
 ```
 node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --dev
@@ -233,6 +234,13 @@ segundo plano, rodando a partir da pasta do projeto. Se o app tem cache, o
 `.env` traz `REDIS_URL` também, e o mesmo túnel abre uma segunda porta
 (`56379`) para um Redis de desenvolvimento — faixa própria, separada da
 produção. Nada a mais para rodar.
+
+**Se o app tem armazenamento, o `.env` traz `STORAGE_TOKEN`, `STORAGE_SIGN_URL`
+e `STORAGE_BUCKET`** — e ele não passa pelo túnel, vai direto pela internet.
+O código do app é o mesmo local e publicado: pedir URL e subir nela. ⚠️ **O
+bucket é OUTRO**, só de desenvolvimento, e o token do `.env` não assina no de
+produção — arquivo que você subir testando não aparece no app publicado, e um
+`PUT` errado não passa por cima do arquivo de um cliente.
 
 Os dois motivos, e os dois mordem em silêncio: o `.env` traz o
 `BRIDGEAI_TUNNEL_TOKEN`, que é o acesso que o túnel lê para abrir a ligação —
