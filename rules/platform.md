@@ -140,6 +140,28 @@ servidor: se o app não tiver um, ele precisa entrar também — são dois pedid
 e os dois custam. O ambiente novo nasce com um banco vazio, e o endereço só
 responde depois da primeira publicação pela Action.
 
+**O projeto pode atender num endereço do usuário**, além do
+`<nome>.bridgeaibrasil.com.br` que ele já tem. Quem registra é ele, no painel,
+na página do projeto: ele digita o endereço, a plataforma devolve um CNAME para
+criar no DNS dele, e o endereço entra no ar sozinho quando o registro estiver
+de pé — costuma levar minutos, mas o relógio é do provedor de DNS dele.
+
+Três coisas para dizer certo, porque as três já confundiram alguém:
+
+- **Soma, não substitui.** O endereço da plataforma continua funcionando, e é
+  ele que o `status` mede. Registrar um domínio próprio não derruba nada.
+- **Não custa nada** — nem item novo, nem linha na conta.
+- **Não existe ferramenta MCP para isso, e não é esquecimento**: o passo que
+  decide é no painel do registrador do domínio, e quem tem a senha de lá é ele.
+  Seu papel é dizer que existe e mandar ao painel, em Projeto → Endereço
+  próprio. O `describe_app` mostra os endereços registrados e o estado de cada
+  um.
+
+Endereço **sem prefixo** (`empresa.com.br`, em vez de `www.empresa.com.br`) só
+funciona em provedor de DNS que aceite CNAME na raiz. Quando ele não aceitar, o
+caminho é usar `www` e mandar a raiz redirecionar — diga isso antes, não depois
+de a tentativa falhar.
+
 **Publicar não é ferramenta MCP.** Quem publica é a GitHub Action do
 repositório do usuário — e **não há segredo nenhum para configurar lá**. A
 Action pede um crachá ao próprio GitHub (`permissions: id-token: write`), que

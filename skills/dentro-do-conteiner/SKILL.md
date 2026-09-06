@@ -194,7 +194,11 @@ Content-Type: application/json
 - **Tarefa agendada / cron / worker separado.** Rode dentro do processo
   (`setInterval`, `node-cron`), aceitando que reinicia junto com o app. Para
   fila, BullMQ no mesmo processo.
-- **Domínio próprio.** O endereço é `<app>.bridgeaibrasil.com.br`.
+- **Endereço.** O da plataforma é `<app>.bridgeaibrasil.com.br`, e ele sempre
+  responde. O usuário pode acrescentar um domínio dele no painel — o app não
+  muda em nada por causa disso: quem roteia é a borda, e o contêiner continua
+  recebendo a requisição do mesmo jeito. Não escreva o endereço no código; se
+  precisar montar link absoluto, leia do `Host` da requisição.
 - **E-mail, SMS, pagamento.** São serviços de fora, com chave pedida por
   `request_variable`.
 - **Mais de uma instância.** Um contêiner por ambiente. Estado em memória

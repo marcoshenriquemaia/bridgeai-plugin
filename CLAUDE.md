@@ -142,5 +142,5 @@ instalação de verdade pelo marketplace, e ela depende do repositório público
   público desde 04/09/2026 (`marcoshenriquemaia/bridgeai-plugin`), e no
   repositório da plataforma esta pasta é um submódulo: commit e push aqui
   primeiro, ponteiro lá depois.
-- Skill de domínio próprio (a feature não existe no servidor; a skill vem depois)
+- Domínio próprio: no servidor desde 06/09/2026, e no `rules/platform.md`. Não virou skill — o que o Claude precisa saber cabe em dois parágrafos, e o passo que decide é no painel do registrador do usuário
 - Teste do `load-platform.js` e do `tunnel.js`, no formato do `hooks.test.js`
