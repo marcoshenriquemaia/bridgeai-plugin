@@ -198,10 +198,14 @@ O servidor roda na máquina da pessoa; banco e armazenamento ficam na nuvem.
 node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --app <app> --environment dev
 ```
 
-Suba ele **antes**, em segundo plano, e deixe rodando — o `.env` do
-`dev_credentials` aponta para `127.0.0.1`, e sem o túnel o app falha com
-"connection refused", erro que não diz nada sobre o código. O passo a passo está
-no `/bridgeai:comecar`.
+A ordem é: **`dev_credentials` e grave o `.env` primeiro; o túnel depois**, em
+segundo plano, rodando a partir da pasta do projeto.
+
+Os dois motivos, e os dois mordem em silêncio: o `.env` traz o
+`BRIDGEAI_TUNNEL_TOKEN`, que é o acesso que o túnel lê para abrir a ligação —
+sem o arquivo, ele diz "faltou o acesso"; e o `DATABASE_URL` aponta para
+`127.0.0.1`, então sem o túnel de pé o app falha com "connection refused", erro
+que não diz nada sobre o código. O passo a passo está no `/bridgeai:comecar`.
 
 **Produção não passa pelo túnel.** Se o app não tiver ambiente local, o ciclo é
 escrever, publicar e investigar com `status`, `logs` e `query` — mas **não diga

@@ -33,6 +33,8 @@
 // em `mcp/src/tunnel.ts`.
 
 const net = require('node:net');
+const { readFileSync } = require('node:fs');
+const { resolve } = require('node:path');
 
 const PADRAO_MCP = 'https://mcp.bridgeaibrasil.com.br';
 
@@ -60,12 +62,50 @@ function args(argv) {
   return out;
 }
 
+/**
+ * Lê uma variável do `.env` do projeto, sem depender de biblioteca.
+ *
+ * ⚠️ É por aqui que o túnel funciona para quem entrou pelo caminho
+ * RECOMENDADO. O login por OAuth (`/mcp` → bridgeai) guarda o acesso dentro do
+ * cliente MCP, e este arquivo é um programa separado: ele não alcança aquele
+ * token, e o ambiente não tem nenhum. O `dev_credentials` resolve gravando um
+ * `BRIDGEAI_TUNNEL_TOKEN` no `.env` — de escopo restrito e curta duração —, e
+ * o que falta é alguém lê-lo.
+ *
+ * Não sobrescreve o ambiente: quem exportou uma variável quis aquilo.
+ */
+function doEnvDoProjeto(chave) {
+  for (const nome of ['.env', '.env.local']) {
+    let bruto;
+    try {
+      bruto = readFileSync(resolve(process.cwd(), nome), 'utf8');
+    } catch {
+      continue;
+    }
+    for (const linha of bruto.split(/\r?\n/)) {
+      const m = linha.match(/^\s*(?:export\s+)?([A-Z0-9_]+)\s*=\s*(.*)$/);
+      if (!m || m[1] !== chave) continue;
+      // Aspas em volta são convenção de arquivo `.env`, não parte do valor.
+      return m[2].trim().replace(/^(['"])([\s\S]*)\1$/, '$2');
+    }
+  }
+  return null;
+}
+
 const opt = args(process.argv.slice(2));
 const app = opt.app;
 const environment = opt.environment || 'dev';
 const porta = Number(opt.port || PORTA_PADRAO);
 const base = (opt.url || process.env.BRIDGEAI_MCP_URL || PADRAO_MCP).replace(/\/+$/, '');
-const token = process.env.BRIDGEAI_TOKEN || opt.token;
+
+// A ordem é do mais explícito para o mais implícito: o que veio no comando
+// ganha de tudo, o ambiente vem depois, e o `.env` é a reserva — que na prática
+// é o caso comum de quem entrou por OAuth.
+const token =
+  opt.token ||
+  process.env.BRIDGEAI_TOKEN ||
+  process.env.BRIDGEAI_TUNNEL_TOKEN ||
+  doEnvDoProjeto('BRIDGEAI_TUNNEL_TOKEN');
 
 function morre(mensagem) {
   console.error(mensagem);

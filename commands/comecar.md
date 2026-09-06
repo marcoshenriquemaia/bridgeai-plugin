@@ -140,22 +140,30 @@ gh repo clone <repo> <caminho>
 O desenho é: **o servidor roda na máquina dele, os dados ficam na nuvem.** Nada de
 Docker, nada de instalar Postgres. Quem liga as duas pontas é o túnel.
 
-São três passos, nesta ordem, e a ordem importa.
+São três passos, nesta ordem, e **a ordem importa** — o passo 1 é o que dá ao
+túnel o acesso que ele precisa.
 
-**1. Suba o túnel, em segundo plano, e deixe rodando.**
+**1. `dev_credentials` e grave o `.env`.** O arquivo já vem apontando para
+`127.0.0.1`, com a senha dentro. Escreva direto no arquivo, **sem imprimir o
+conteúdo no chat**, e confirme que `.env` está no `.gitignore`.
+
+Entre as variáveis vem o `BRIDGEAI_TUNNEL_TOKEN`, que é o acesso que o túnel usa
+para abrir a ligação. Ele vale 7 dias. **Por isso este passo vem antes**: subir o
+túnel primeiro, num projeto novo, dá "faltou o acesso" — o arquivo que ele lê
+ainda não existe.
+
+**2. Suba o túnel, em segundo plano, e deixe rodando** — a partir da pasta do
+projeto, que é onde o `.env` está.
 
 ```
 node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --app <app> --environment dev
 ```
 
-Ele abre um `127.0.0.1:55432` que se comporta como um Postgres comum e precisa do
-`BRIDGEAI_TOKEN` no ambiente — o mesmo do login. Quando alguma coisa estiver errada
-(ambiente que não existe, projeto de outra pessoa, acesso vencido), ele diz o motivo
-em português e sai; **leia o que ele disse antes de tentar outra coisa.**
-
-**2. `dev_credentials` e grave o `.env`.** O arquivo já vem apontando para
-`127.0.0.1`, com a senha dentro. Escreva direto no arquivo, **sem imprimir o
-conteúdo no chat**, e confirme que `.env` está no `.gitignore`.
+Ele abre um `127.0.0.1:55432` que se comporta como um Postgres comum. Quando
+alguma coisa estiver errada (ambiente que não existe, projeto de outra pessoa,
+acesso vencido), ele diz o motivo em português e sai; **leia o que ele disse
+antes de tentar outra coisa.** Se disser que o acesso expirou, chame
+`dev_credentials` de novo e regrave o `.env` — o token novo vem junto.
 
 **3. Instale as dependências e suba o servidor.** Confira que respondeu, e só então
 mande o endereço:
