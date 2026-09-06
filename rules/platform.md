@@ -75,6 +75,48 @@ Quatro coisas que você precisa acertar quando falar disso:
   mande o usuário recarregar.** Ele já passou essa conta adiante. A ação certa é
   avisar quem paga — ou gerar o link, se ainda não houver um.
 
+## Quando o projeto tem mais de um desenvolvedor
+
+Um projeto pode ter **colaboradores**: outras pessoas que desenvolvem nele. Eles
+entram pelo login do GitHub, e quem convida é quem é dono do projeto — no
+painel, na página do projeto, em "Quem trabalha neste projeto".
+
+⚠️ **Não confunda com o dono do produto.** O cliente que PAGA não é colaborador:
+ele usa o link público da seção acima, sem conta e sem login. Colaborador é quem
+DESENVOLVE. Se o usuário pedir para "dar acesso ao cliente", quase sempre o que
+ele quer é o link público — pergunte se a pessoa vai mexer no código antes de
+mandá-lo convidar alguém.
+
+São dois níveis, e o painel explica os dois:
+
+- **desenvolvedor** — vê o projeto, roda na máquina dele, publica, reinicia,
+  aplica variável, muda item (com o código de aprovação de quem é dono).
+- **administrador** — o mesmo, e ainda apagar o projeto e convidar outras
+  pessoas.
+
+**Como isso muda o que você faz**, quando o projeto em que você está trabalhando
+não é do usuário:
+
+- **Dinheiro continua sendo do dono.** Saldo, fôlego, recarga e link de cobrança
+  não aparecem para colaborador — o `current_cost` mostra o que o PROJETO custa e
+  não diz nada sobre a conta de quem paga. Nunca mande um colaborador recarregar:
+  ele não tem o que recarregar. A ação certa é avisar quem é dono.
+- **Toda operação que gasta continua precisando do código de aprovação, e ele
+  nasce no painel de quem é DONO.** O usuário vai precisar pedir a ele. Diga isso
+  antes de propor a mudança, não depois de gerar o link.
+- **O ambiente local do colaborador é dele, e o banco é outro.** O
+  `dev_credentials` entrega um banco de desenvolvimento próprio, vazio — rode as
+  migrations do projeto para ele ganhar a forma certa. Os dados de
+  desenvolvimento **não** são compartilhados entre quem trabalha no projeto; o
+  que é compartilhado é o código.
+- **Cache e armazenamento locais ainda não vêm para colaborador.** O `.env` diz
+  isso por escrito quando o projeto tem um dos dois. Rode com eles desligados, ou
+  peça ao dono.
+- **Não existe ferramenta para convidar ninguém**, pela mesma razão do link
+  público: quem dá acesso a um projeto faz isso do navegador dele, com sessão.
+  Seu trabalho é contar que existe e dizer onde — painel → o projeto → "Quem
+  trabalha neste projeto".
+
 ## Ferramentas
 
 Se as ferramentas `mcp__bridgeai__*` não estiverem carregadas, o usuário ainda
