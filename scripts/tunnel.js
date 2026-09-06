@@ -47,6 +47,13 @@ const PADRAO_MCP = 'https://mcp.bridgeaibrasil.com.br';
  */
 const PORTA_PADRAO = 55432;
 
+/**
+ * A porta local do cache, quando o app tem um. Longe da 6379 pelo mesmo
+ * motivo, e tem que casar com `portaCache` no `credentials` de
+ * `mcp/src/real-source.ts`.
+ */
+const PORTA_CACHE_PADRAO = 56379;
+
 /** Quanto esperar pelo aperto de mão com o servidor antes de desistir. */
 const ESPERA_MS = 10_000;
 
@@ -136,9 +143,16 @@ if (!token) {
   );
 }
 
-const wsUrl =
+// O cache vem junto quando o `.env` que o `dev_credentials` escreveu diz que
+// vem (`BRIDGEAI_TUNNEL_CACHE`), ou quando alguém pede `--cache`. Sem uma das
+// duas, só o banco — o comportamento de sempre.
+const comCache = 'cache' in opt || doEnvDoProjeto('BRIDGEAI_TUNNEL_CACHE') !== null;
+const portaCache = Number(opt['cache-port'] || PORTA_CACHE_PADRAO);
+
+const wsUrlPara = (target) =>
   `${base.replace(/^http/, 'ws')}/tunnel` +
-  `?app=${encodeURIComponent(app)}&environment=${encodeURIComponent(environment)}&target=db`;
+  `?app=${encodeURIComponent(app)}&environment=${encodeURIComponent(environment)}&target=${target}`;
+const wsUrl = wsUrlPara('db');
 
 /**
  * Pergunta ao servidor por que o túnel não abriria, ANTES de tentar abrir.
@@ -147,10 +161,10 @@ const wsUrl =
  * e 404 chegam aqui como o mesmo erro vazio. Sem esta pergunta, a única coisa
  * que dá para dizer é "não deu" — e quem está do outro lado não programa.
  */
-async function conferir() {
+async function conferir(target = 'db') {
   const url =
     `${base}/tunnel/check` +
-    `?app=${encodeURIComponent(app)}&environment=${encodeURIComponent(environment)}`;
+    `?app=${encodeURIComponent(app)}&environment=${encodeURIComponent(environment)}&target=${target}`;
   let res;
   try {
     res = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
@@ -205,7 +219,7 @@ function ocupada(p) {
  * primeiro a descobrir que o banco não vinha era o app da pessoa, com um erro
  * de driver que não aponta para lugar nenhum.
  */
-function apresentacao() {
+function apresentacao(url = wsUrl) {
   return new Promise((resolve) => {
     let respondido = false;
     const fim = (r) => {
@@ -216,7 +230,7 @@ function apresentacao() {
 
     let ws;
     try {
-      ws = new WebSocket(wsUrl, [PROTOCOLO, `bridgeai.token.${token}`]);
+      ws = new WebSocket(url, [PROTOCOLO, `bridgeai.token.${token}`]);
     } catch {
       return fim(false);
     }
@@ -245,8 +259,8 @@ function apresentacao() {
 }
 
 /** Liga uma conexão local ao servidor. Uma por conexão, como um TCP de verdade. */
-function atende(local) {
-  const ws = new WebSocket(wsUrl, [PROTOCOLO, `bridgeai.token.${token}`]);
+function atende(local, url = wsUrl) {
+  const ws = new WebSocket(url, [PROTOCOLO, `bridgeai.token.${token}`]);
   ws.binaryType = 'arraybuffer';
 
   // O que chegar antes de o WebSocket abrir fica aqui. Um driver de banco manda
@@ -347,6 +361,30 @@ async function main() {
   servidor.listen(porta, '127.0.0.1', () => {
     console.log(`Túnel aberto: 127.0.0.1:${porta} → banco de ${app} (${environment}).`);
     console.log('O banco da nuvem respondeu — a ligação foi conferida, e não só reservada.');
+    if (!comCache) console.log('Deixe esta janela aberta enquanto estiver desenvolvendo.');
+  });
+
+  if (!comCache) return;
+
+  // A segunda porta, para o cache. Mesmas três conferências do banco, pela
+  // mesma razão: uma porta aberta sem nada atrás parece que funciona e falha
+  // só quando o app for usar.
+  if (await ocupada(portaCache)) {
+    morre(
+      `Já tem alguma coisa atendendo em 127.0.0.1:${portaCache}, e é onde o cache do projeto iria.\n` +
+        'Quase sempre é um Redis seu. Desligue-o, ou escolha outra porta com\n' +
+        `--cache-port ${portaCache + 1} — e mude a porta em REDIS_URL no .env junto.`,
+    );
+  }
+  await conferir('cache');
+  if (!(await apresentacao(wsUrlPara('cache')))) {
+    morre('O banco do projeto respondeu, mas o cache não. Tente de novo em alguns segundos.');
+  }
+
+  const servidorCache = net.createServer((local) => atende(local, wsUrlPara('cache')));
+  servidorCache.on('error', (e) => morre(`Não consegui abrir a porta ${portaCache} do cache: ${e.message}`));
+  servidorCache.listen(portaCache, '127.0.0.1', () => {
+    console.log(`Túnel aberto: 127.0.0.1:${portaCache} → cache de ${app} (faixa de desenvolvimento, separada da produção).`);
     console.log('Deixe esta janela aberta enquanto estiver desenvolvendo.');
   });
 }

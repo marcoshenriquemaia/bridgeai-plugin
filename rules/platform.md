@@ -222,7 +222,10 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --app <app> --environment dev
 ```
 
 A ordem é: **`dev_credentials` e grave o `.env` primeiro; o túnel depois**, em
-segundo plano, rodando a partir da pasta do projeto.
+segundo plano, rodando a partir da pasta do projeto. Se o app tem cache, o
+`.env` traz `REDIS_URL` também, e o mesmo túnel abre uma segunda porta
+(`56379`) para um Redis de desenvolvimento — faixa própria, separada da
+produção. Nada a mais para rodar.
 
 Os dois motivos, e os dois mordem em silêncio: o `.env` traz o
 `BRIDGEAI_TUNNEL_TOKEN`, que é o acesso que o túnel lê para abrir a ligação —

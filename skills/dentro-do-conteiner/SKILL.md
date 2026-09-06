@@ -109,9 +109,12 @@ faixa dele. Consequências:
   rate-limit funcionam.
 - Não há `maxmemory` por app: o cache é fatia de uma instância compartilhada.
   Use TTL em tudo.
-- **O ambiente local não tem Redis.** O túnel leva só o banco. Um app com cache
-  precisa **tolerar `REDIS_URL` ausente** no local (cache em memória, ou
-  desligado) — senão não roda na máquina do usuário.
+- **No ambiente local o cache vem pelo mesmo túnel**, numa faixa de chaves só
+  de desenvolvimento (`t:<app>-dev:*`), separada da produção. O
+  `dev_credentials` escreve `REDIS_URL` apontando para `127.0.0.1:56379` e o
+  `tunnel.js` abre essa segunda porta sozinho. Mesmo assim, faça o app
+  **tolerar `REDIS_URL` ausente** (cache em memória ou desligado): é o que o
+  mantém de pé quando o túnel cai no meio do trabalho.
 
 ## Arquivos (armazenamento)
 
