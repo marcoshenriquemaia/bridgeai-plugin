@@ -72,12 +72,20 @@ zero dependência — com uma diferença que é a razão de ele existir separado
 token nunca sai no stdout.** Quem roda o script é o Claude, pela ferramenta Bash,
 e o stdout dele vai para o chat. O script grava direto no ambiente (`setx` no
 Windows, o arquivo de perfil do shell nos outros) e a tela só diz "entrou como
-fulano". O `.mcp.json` lê `${BRIDGEAI_TOKEN}` no arranque do Claude Code, então
-entrar exige fechar e abrir — não há como evitar, e o `/bridgeai:entrar` diz isso.
+fulano".
 
-Sem o token, o `SessionStart` acrescenta um aviso mandando rodar `/bridgeai:entrar`.
-Sem esse aviso, o que o usuário vê é "MCP server bridgeai failed", que não aponta
-para lugar nenhum.
+⚠️ **Este parágrafo dizia que o `.mcp.json` lê `${BRIDGEAI_TOKEN}` no arranque, e
+que por isso entrar exige fechar e abrir o Claude Code. Deixou de ser verdade em
+04/09/2026**, quando o OAuth entrou: o `.mcp.json` tem só `type` e `url`, o
+cliente MCP faz o login sozinho, e não há variável de ambiente nenhuma no
+caminho. O mesmo se aplicava ao aviso do `SessionStart`, que saía de a variável
+estar vazia e apareceria em toda sessão de quem já entrou.
+
+**O `login.js` continua existindo, e para uma coisa só: o túnel.**
+`scripts/tunnel.js` lê `process.env.BRIDGEAI_TOKEN` — ele é um processo
+separado, fora do cliente MCP, e não tem como alcançar o token que o OAuth
+guardou. Quem entrou pelo caminho novo **não tem essa variável**, e é por isso
+que o túnel ainda pede o login antigo.
 
 `login.test.js` afirma o negativo — o token NÃO aparece na saída — contra um
 servidor de mentira. Detalhe do teste: `spawn` e não `spawnSync`, porque o servidor

@@ -74,7 +74,26 @@ function morre(mensagem) {
 
 if (!app) morre('Diga qual projeto: --app <nome-do-projeto>');
 if (!token) {
-  morre('Faltou o acesso da BridgeAI. Rode `npm run login` e tente de novo.');
+  // ⚠️ Esta mensagem dizia "rode `npm run login`" — um comando do repositório
+  // PRIVADO da plataforma, que quem instalou o plugin não tem. Ela mandava a
+  // pessoa a um lugar onde ela não consegue chegar.
+  //
+  // E a causa mais provável de cair aqui não é "não entrei": é ter entrado pelo
+  // caminho recomendado. O login por OAuth (`/mcp` → bridgeai) guarda o token
+  // dentro do cliente MCP, e este script é um processo separado que só enxerga
+  // o ambiente. Enquanto o túnel autenticar por variável, quem entrou por OAuth
+  // precisa deste segundo login.
+  morre(
+    'Faltou o acesso da BridgeAI para abrir o túnel.\n' +
+      '\n' +
+      'Rode:  node "' +
+      (process.env.CLAUDE_PLUGIN_ROOT || '<plugin>') +
+      '/scripts/login.js"\n' +
+      '\n' +
+      'Depois feche e abra o terminal, para a variável entrar no ambiente.\n' +
+      'Se você entrou pelo /mcp, isto é esperado: aquele login vale para as\n' +
+      'ferramentas, e o túnel é um programa à parte que ainda lê o ambiente.',
+  );
 }
 
 const wsUrl =

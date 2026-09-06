@@ -1,8 +1,22 @@
 # BridgeAI — plugin para Claude Code
 
+**[bridgeaibrasil.com.br](https://bridgeaibrasil.com.br)** · hospedagem brasileira
+que o seu agente de código opera sozinho.
+
 Conecta o Claude Code à plataforma BridgeAI. Com ele, o Claude para de trabalhar no
 escuro: cria o projeto, enxerga o banco, os logs, o custo e o estado do que está no
 ar — e mostra o preço antes de gastar o seu dinheiro.
+
+Servidor, banco PostgreSQL, cache e arquivos em máquinas no Brasil, com crédito
+pré-pago por Pix — sem assinatura, sem fatura e sem cartão internacional. Você
+contrata item por item, e o que não foi pedido não é cobrado.
+
+O preço fica em
+**[bridgeaibrasil.com.br/precos](https://bridgeaibrasil.com.br/precos)**, e não
+aqui de propósito: aquela página é **gerada do mesmo catálogo que emite a
+cobrança**, então ela não tem como divergir. Um valor digitado neste README
+divergiria no primeiro dia em que o catálogo mudasse, dentro de um arquivo que
+ninguém relê.
 
 Feito para funcionar **junto** com o
 [guardrail](https://github.com/marcoshenriquemaia/claude-guardrail), não no lugar
@@ -100,7 +114,7 @@ Para forçar em uma sessão: `BRIDGEAI_PROFILE=technical`. Para fixar na máquin
 
 ```
 .claude-plugin/plugin.json   manifesto
-.mcp.json                    conexão com o MCP da BridgeAI (lê BRIDGEAI_TOKEN)
+.mcp.json                    conexão com o MCP da BridgeAI (login por OAuth)
 hooks/hooks.json             início de sessão e proteções
 rules/platform.md            sempre carregado
 rules/guided.md              carregado só no perfil guided
