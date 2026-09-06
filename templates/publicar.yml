@@ -124,7 +124,7 @@ jobs:
           ls -lh /tmp/imagem.tar
 
           # `--upload-file` põe o `Content-Length` sozinho, que a URL assinada
-          # exige. Um `-d @arquivo` mandaria em `chunked` e a Magalu recusaria.
+          # exige. Um `-d @arquivo` mandaria em `chunked` e o armazenamento recusaria.
           curl -sS --fail-with-body -X PUT --upload-file /tmp/imagem.tar "$(cat /tmp/upload-url)"
 
       - name: Publicar
