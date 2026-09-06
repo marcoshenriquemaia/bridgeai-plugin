@@ -38,7 +38,9 @@ pedir.
 - **Imagem sobe pelo armazenamento do app, por URL assinada.** O servidor pede a
   URL à plataforma (o contêiner já tem `STORAGE_TOKEN` e `STORAGE_SIGN_URL` no
   ambiente) e entrega ao navegador, que sobe o arquivo direto. Credencial de
-  armazenamento nunca vai ao navegador — o app nem tem uma.
+  armazenamento nunca vai ao navegador — o app nem tem uma. O formato do pedido
+  está na skill `dentro-do-conteiner`; e **nunca grave em `./uploads`**: o
+  disco do servidor é somente leitura.
 
 ## Quando o botão precisa fazer algo de verdade
 

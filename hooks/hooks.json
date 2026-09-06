@@ -12,7 +12,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "^mcp__bridgeai__(execute_sql|remove_resource|provision_resource|remove_app|apply_migration)$",
+        "matcher": "^mcp__bridgeai__(execute_sql|remove_resource|provision_resource|remove_app|rollback_deploy|apply_migration)$",
         "hooks": [
           {
             "type": "command",

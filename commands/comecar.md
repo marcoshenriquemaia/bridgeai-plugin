@@ -206,8 +206,9 @@ para colar.
 
 Siga o `/bridgeai:publicar` — ele é este passo inteiro, e é retomável. Em resumo:
 
-1. **O Dockerfile e o workflow.** Escreva um `Dockerfile` que suba o app na porta
-   que ele usa e confira que o caminho de saúde responde 200. Copie
+1. **O Dockerfile e o workflow.** Escreva um `Dockerfile` seguindo a skill
+   `dentro-do-conteiner` — porta em `process.env.PORT`, disco somente leitura,
+   migration no `CMD` — e confira que o caminho de saúde responde 200. Copie
    `${CLAUDE_PLUGIN_ROOT}/templates/publicar.yml` para
    `.github/workflows/publicar.yml`, trocando `APP_ID_AQUI` pelo id do app.
 2. **Um `git push` na branch principal.** A Action compila, sobe a imagem e troca o

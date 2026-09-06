@@ -42,8 +42,14 @@ de deixar a Action falhar com 404.
 
 ## 3. O Dockerfile
 
-Se não existir, escreva um que suba o app na porta que ele usa. Confira que o
-caminho de saúde declarado no app responde 200 — `describe_app` diz qual é.
+Se não existir, escreva um seguindo a skill **`dentro-do-conteiner`** — ela é o
+contrato do que roda lá: o app escuta em `process.env.PORT` (a plataforma manda
+`3000`), o disco é somente leitura, a migration roda no `CMD` antes do servidor,
+e arquivo vai para o armazenamento por URL assinada. Um Dockerfile que ignora
+isso sobe saudável e o site responde 502.
+
+Confira que o caminho de saúde responde 200 — `describe_app` diz qual é, e
+`set_health_path` muda se você criou a rota em outro lugar.
 
 ## 4. O workflow
 
