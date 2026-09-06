@@ -97,6 +97,31 @@ dentro do `CMD` acima. Regras:
 4. Se a migration falha, o app não sobe, e `logs` mostra o erro. `status` diz
    "fora do ar" e a publicação `healthy: false`.
 
+### Prisma: o `shadowDatabaseUrl` já vem no `.env`
+
+`prisma migrate dev` cria um **shadow database** descartável, e a role da
+plataforma não cria database — nenhuma cria, por desenho. Sem endereço de um
+shadow que já existe, ele morre em **P3014**, `permission denied to create
+database`.
+
+O `dev_credentials` escreve `SHADOW_DATABASE_URL` no `.env`, apontando para um
+banco descartável **da pessoa** que a plataforma provisiona junto com o ambiente
+de desenvolvimento dela. Ponha no schema:
+
+```prisma
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+```
+
+⚠️ **Nunca aponte o `shadowDatabaseUrl` para o banco de um projeto.** O Prisma
+**apaga** o shadow a cada migration — medido. Apontá-lo para outro projeto do
+usuário destruiria aquele banco, em silêncio, no comando que ele roda todo dia.
+Se a variável não estiver no `.env`, chame `dev_credentials` de novo; não invente
+um endereço.
+
 ## Cache (Redis)
 
 O usuário do app tem `+@all -@dangerous`: **não** faz `KEYS`, `FLUSHALL`,

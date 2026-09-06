@@ -177,6 +177,12 @@ acesso vencido), ele diz o motivo em português e sai; **leia o que ele disse
 antes de tentar outra coisa.** Se disser que o acesso expirou, chame
 `dev_credentials` de novo e regrave o `.env` — o token novo vem junto.
 
+**Se o projeto usa Prisma**, o `.env` já traz `SHADOW_DATABASE_URL` — ponha o
+`shadowDatabaseUrl = env("SHADOW_DATABASE_URL")` no `datasource` do schema. Sem
+ele, `prisma migrate dev` morre em **P3014**: ele cria um banco descartável, e
+nenhuma role da plataforma cria database. **Nunca aponte essa variável para o
+banco de um projeto** — o Prisma apaga o shadow a cada migration.
+
 **3. Instale as dependências e suba o servidor.** Confira que respondeu, e só então
 mande o endereço:
 
