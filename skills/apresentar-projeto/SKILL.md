@@ -193,6 +193,59 @@ Regras curtas:
   acaba. Ponha os passos **na ordem das telas** — pular de uma para outra e
   voltar faz o desenho piscar sem motivo.
 
+### Cenas: modal, menu, carrinho, animação
+
+O roteiro sabe apontar, rolar e trocar de tela. Ele **não** sabe o que é um
+carrinho — e não deveria. Um passo pode declarar uma **cena** pelo nome, e quem
+decide o que ela significa é o mockup:
+
+```jsonc
+{ "anchor": "sacola", "group": "Home", "state": "carrinho-cheio",
+  "title": "O que acontece ao adicionar", "body": "…" }
+```
+
+A plataforma entrega esse nome de **duas formas**, porque são duas coisas
+diferentes:
+
+| | O que é | Quando usar |
+|---|---|---|
+| `data-bai-cena` no `<html>` | **estado** | modal aberto, menu escancarado, aba selecionada |
+| evento `bai:cena` | **gatilho** | animação, contador subindo, item voando para a sacola |
+
+Estado dá para fazer **sem uma linha de JS**:
+
+```css
+#modal-carrinho { display: none }
+[data-bai-cena="carrinho-cheio"] #modal-carrinho { display: flex }
+[data-bai-cena="menu-aberto"] .menu-mobile { transform: none }
+```
+
+Gatilho precisa do evento, porque um atributo que **já está lá** não acontece de
+novo:
+
+```js
+document.addEventListener('bai:cena', function (e) {
+  if (e.detail.cena === 'carrinho-cheio') tocarAnimacaoDaSacola();
+});
+```
+
+Quatro regras curtas:
+
+- **Passo sem `state` FECHA a cena do anterior.** Não escreva um passo "fechar o
+  carrinho": é só não pôr cena. Sem esse desfazer, o modal do passo 4 ficaria por
+  cima do resto da apresentação.
+- **A mesma cena em passos seguidos não redispara o evento.** Dois passos sobre o
+  carrinho aberto mantêm o modal de pé sem a animação rodar duas vezes.
+- **O nome é um id**: letras, números, hífen e sublinhado, começando por letra.
+  Ele vira valor de atributo e alvo de seletor.
+- **Abra a cena de forma síncrona.** O passo mede onde contornar logo depois de
+  mandar a cena; um modal que só aparece no `requestAnimationFrame` seguinte é
+  contornado no lugar errado por um instante.
+
+A cena é ortogonal à tela: um passo pode estar em `group: "Página de produto"` e
+com `state: "carrinho-cheio"` ao mesmo tempo. A tela é a página; a cena é o que
+está acontecendo nela.
+
 ### Depois de publicar
 
 Mande o link para o usuário e diga em uma frase o que o cliente vai encontrar.
