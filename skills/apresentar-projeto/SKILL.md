@@ -158,8 +158,8 @@ falhar, a versão não fecha.
 
 ### O roteiro é a metade que o Figma não tem
 
-`steps` é uma lista ordenada de `{anchor, title, body}`. O `body` responde **por
-que está assim**, em português de gente:
+`steps` é uma lista ordenada de `{anchor, title, body, group}`. O `body`
+responde **por que está assim**, em português de gente:
 
 > ✅ "A frase vem antes de qualquer foto porque é ela que explica o que você
 > vende. Tirei as redes sociais do topo: quem chega pelo Instagram já sabe quem
@@ -176,6 +176,22 @@ Regras curtas:
 - **Diga a decisão, não a descrição.** "Três por linha" o cliente já está vendo;
   "sem botão de comprar porque a encomenda acontece no WhatsApp, que é onde suas
   clientes já falam com você" ele não.
+- **O roteiro é quem CONDUZ.** Avançar um passo rola até a âncora dele, e um
+  passo de outra tela troca a tela do mockup sozinho. O cliente não precisa
+  clicar dentro do desenho para chegar a lugar nenhum — clicar lá dentro é
+  comentar.
+- **Com mais de uma tela, `group` deixa de ser opcional na prática.** Ele é o
+  nome da tela, repetido nos passos dela; a apresentação se separa por ele e a
+  contagem recomeça em cada uma:
+
+  ```
+  Home              1 A capa · 2 A vitrine · 3 A assinatura
+  Página de produto 1 Onde a compra acontece · 2 Quem planta o café
+  ```
+
+  Sem ele, oito passos viram uma lista corrida e ninguém sabe onde uma tela
+  acaba. Ponha os passos **na ordem das telas** — pular de uma para outra e
+  voltar faz o desenho piscar sem motivo.
 
 ### Depois de publicar
 
