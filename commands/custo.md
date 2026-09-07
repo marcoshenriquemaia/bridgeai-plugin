@@ -36,7 +36,7 @@ dados próprio e custa cerca de R$ 39/mês. Homologação que ninguém abre há 
 é dinheiro correndo — **diga o valor**.
 
 ⚠️ **O ambiente local NÃO é um deles.** Ele é da conta da pessoa, aparece uma vez
-só (na tela de Custo do painel, com um card próprio) e serve todos os projetos
+só (na aba "Ambiente de dev" do painel) e serve todos os projetos
 dela — não é uma linha por projeto e não sai da conta de nenhum cliente. Nunca
 ofereça "cortar o ambiente local deste projeto": não é um item do projeto, e
 desativar o ambiente inteiro apaga os bancos de desenvolvimento de todos os
