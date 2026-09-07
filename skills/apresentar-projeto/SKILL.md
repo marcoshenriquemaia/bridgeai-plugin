@@ -95,6 +95,54 @@ SVG por dentro, bloco de cor ou gradiente. Teto de 4 MB.
 
 Não escreva camada de comentário nenhuma: a plataforma injeta a dela ao publicar.
 
+### Mais de uma página, quando o projeto tem
+
+Uma loja tem home e página de produto; um sistema tem lista e detalhe. Mostrar
+só uma delas esconde metade do trabalho — e é justamente a metade onde o cliente
+tem opinião.
+
+O arquivo continua sendo **um só**. Cada página é um `<main>` de primeiro nível
+com `id`, e quem troca é o `location.hash`:
+
+```html
+<main id="home">…</main>
+<main id="produto" hidden>…</main>
+
+<script>
+(function () {
+  var PAGINAS = ['home', 'produto'];
+  function rotear() {
+    var alvo = (location.hash || '').slice(1);
+    var pagina = PAGINAS.indexOf(alvo) >= 0 ? alvo : 'home';
+    for (var i = 0; i < PAGINAS.length; i++) {
+      var el = document.getElementById(PAGINAS[i]);
+      if (el) el.hidden = PAGINAS[i] !== pagina;
+    }
+  }
+  window.addEventListener('hashchange', rotear);
+  rotear();
+})();
+</script>
+```
+
+Três coisas que fazem isso funcionar dentro da prévia:
+
+- **A navegação vai por `<a href="#produto">`, e nunca por `href="/produto"`.**
+  Um endereço que troca o documento leva o quadro da apresentação para um 404 do
+  armazenamento — e a plataforma cancela esse clique justamente por isso. O que
+  começa com `#` passa.
+- **O `hash` é o contrato, e é o que faz o roteiro atravessar páginas.** Um passo
+  que aponta para algo dentro de `#produto` abre a página sozinho antes de rolar
+  até lá. Sem hash-routing, o passo rolaria até um elemento escondido e o cliente
+  leria a explicação de uma parte que não está na tela.
+- **Uma âncora comum da mesma página continua funcionando.** `#cafes`,
+  `#assinatura` — o roteador cai no padrão, mostra a home, e o navegador rola.
+  Por isso `PAGINAS` é uma lista fechada, e não "todo hash é uma página".
+
+Cabeçalho e rodapé ficam **fora** dos `<main>`: eles são das duas páginas, e
+repeti-los daria dois elementos com o mesmo `id` — o que quebra a âncora de todo
+comentário feito neles.
+
 ---
 
 ## Parte 3 — publicar
