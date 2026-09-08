@@ -342,6 +342,15 @@ que isso é limitação do plano**: não existe plano, e acrescentar o ambiente 
 é `provision_resource` com `resource_kind: "database"` e `environment: "dev"`.
 Se o usuário já tem ambiente de desenvolvimento, isso não muda a conta dele.
 
+⚠️ **O ambiente local não tem endereço na internet.** O servidor está na máquina
+dele: o que existe é `localhost`, e nenhum outro aparelho alcança isso — nem o
+celular dele na mesma mesa, nem o navegador de um cliente. Sempre que a chamada
+vier de fora daquela máquina (app de celular, webhook de pagamento, integração
+de terceiro), o que responde é **produção ou homologação**, e o endereço público
+sai do `describe_app`. Nunca monte uma URL com o IP da máquina dele sem dizer que
+ela para de funcionar assim que o notebook fechar. Para app de celular, a skill
+`publicar-mobile` tem o quadro de qual fase aponta para onde.
+
 ## Operação sem volta exige código de aprovação
 
 `execute_sql`, `apply_migration`, `remove_resource`, `remove_app`,
@@ -421,10 +430,17 @@ Qualquer app pode ter os três ambientes; homologação custa outro servidor, e
 por isso só entra se o usuário pedir. Nunca diga que um ambiente "é de plano
 maior": não existe plano.
 
-**Produção e homologação são bancos do PROJETO e entram na conta como uma linha
-cada.** Cerca de R$ 39/mês. Não é taxa de plataforma: é um banco de dados de
-verdade, com as credenciais dele, separado dos outros — que é o que faz você
-poder derrubar tudo no local sem encostar em produção.
+**Produção e homologação são do PROJETO, e cada uma paga o banco E o servidor
+dela** — ambiente servido tem contêiner próprio (`app-<id>`, `app-<id>-staging`),
+com a memória reservada de cada um. Um banco é cerca de R$ 39/mês, e o servidor
+custa o que o tamanho contratado custa. Não é taxa de plataforma: é um banco de
+dados de verdade, com as credenciais dele, separado dos outros — que é o que faz
+você poder derrubar tudo no local sem encostar em produção.
+
+⚠️ **Cote antes de propor homologação, com `estimate_cost`**, e diga o número. Ela
+quase dobra a conta de um projeto publicado, e é a decisão que mais vira surpresa
+na fatura de quem só queria "um lugar para o cliente testar". Um app de celular
+não precisa dela: o build de teste pode apontar para produção.
 
 **O ambiente local é da CONTA**, e por isso ele cobra uma vez só, na primeira vez
 que a pessoa cria um projeto com ele. Nunca diga que o segundo projeto vai custar

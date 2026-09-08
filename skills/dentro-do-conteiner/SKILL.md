@@ -189,6 +189,29 @@ Content-Type: application/json
   Os arquivos que você subir desenvolvendo ficam no bucket local, e **não
   aparecem** no app publicado. Precisa de um arquivo nos dois? Suba duas vezes.
 
+## Quando quem chama é um app de celular
+
+O contêiner é o mesmo; o que muda é quem está do outro lado. Detalhes em
+`publicar-mobile`; aqui está só o que decide código dentro do servidor.
+
+- **Um app nativo não tem navegador**, então cookie de sessão não serve e CORS não
+  se aplica. Autenticação vai em cabeçalho (`Authorization`). **Expo web é
+  navegador**, e aí o CORS volta a valer: libere a origem do empacotador só em
+  desenvolvimento, nunca `*` em produção.
+- **HTTPS com certificado válido vem no primeiro deploy**, e é isso que satisfaz o
+  iOS e o Android sem configuração nenhuma. Nunca ofereça ao app um endereço `http://`
+  que não seja a máquina de quem desenvolve.
+- **Link que abre o app** (Universal Links / App Links): sirva
+  `/.well-known/apple-app-site-association` e `/.well-known/assetlinks.json` como
+  `application/json`, **sem redirecionamento** — um 301 no meio faz o sistema desistir
+  em silêncio, e o link volta a abrir o navegador.
+- **Foto e vídeo não passam pela sua API.** O celular pede a URL assinada e faz o PUT
+  direto no armazenamento, em partes acima de 5 MB. Bufferizar um vídeo dentro de um
+  contêiner de 256 MB é o jeito mais rápido de derrubá-lo.
+- **O app velho continua no aparelho.** Quem não atualizou continua chamando a versão
+  anterior da sua API por semanas: só acrescente campo, nunca remova nem renomeie sem
+  uma rota nova ao lado.
+
 ## O que não existe, e como o app contorna
 
 - **Tarefa agendada / cron / worker separado.** Rode dentro do processo
