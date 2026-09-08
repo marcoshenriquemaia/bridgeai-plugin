@@ -59,12 +59,37 @@ function read(name) {
 //
 // Quem diz o que fazer é o `platform.md`, e ele diz pelo sinal certo: se as
 // ferramentas `mcp__bridgeai__*` não estiverem carregadas, o usuário não entrou.
-try {
+
+/**
+ * As portas locais que sobraram da sessão anterior.
+ *
+ * Este é o pedaço que resolve o problema de verdade, e ele precisa ser MEDIDO
+ * aqui e não lido de um arquivo: a sessão que deixou o servidor rodando não
+ * escreveu "fechei" em lugar nenhum, e a que fechou pode ter sido morta com a
+ * janela. Ver `scripts/portas.js`.
+ *
+ * Silencioso quando não há nada de pé — o custo em contexto tem que ser zero
+ * para quem começou a máquina limpa, senão isto vira uma linha que se aprende a
+ * ignorar.
+ */
+async function portasAbertas() {
+  try {
+    const portas = require('./portas.js');
+    return portas.resumo(await portas.reconciliar());
+  } catch {
+    return '';
+  }
+}
+
+async function main() {
   const parts = [read('platform.md')];
   if (readProfile() === 'guided') parts.push(read('guided.md'));
 
+  const portas = await portasAbertas();
+  if (portas) parts.push(portas);
+
   const text = parts.filter(Boolean).join('\n\n---\n\n');
-  if (!text) process.exit(0);
+  if (!text) return;
 
   process.stdout.write(JSON.stringify({
     hookSpecificOutput: {
@@ -72,6 +97,6 @@ try {
       additionalContext: text,
     },
   }));
-} catch {
-  process.exit(0);
 }
+
+main().catch(() => process.exit(0));

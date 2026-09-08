@@ -141,6 +141,16 @@ Não pergunte onde ele quer salvar: escolha o caminho certo e siga.
 gh repo clone <repo> <caminho>
 ```
 
+**E escreva o `CLAUDE.md` do projeto**, a partir de
+`${CLAUDE_PLUGIN_ROOT}/templates/projeto.md`, trocando `<app>` pelo id. Se já
+existir um, **acrescente a seção no fim** — nunca sobrescreva o arquivo de
+alguém.
+
+Ele é o que faz o projeto se apresentar sozinho. As regras da plataforma que
+você está lendo agora chegam por um hook, que existe só nesta máquina e só com o
+plugin instalado: um colaborador que clone este repositório, ou outro agente, não
+recebe nada. Versionado no projeto, alcança os dois.
+
 ## Etapa 6 — Rodar na máquina dele
 
 O desenho é: **o servidor roda na máquina dele, os dados ficam na nuvem.** Nada de

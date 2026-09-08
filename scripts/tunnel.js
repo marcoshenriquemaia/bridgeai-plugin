@@ -44,6 +44,32 @@ const net = require('node:net');
 const { readFileSync } = require('node:fs');
 const { resolve } = require('node:path');
 
+/**
+ * O registro de portas locais (`~/.bridgeai/portas.json`).
+ *
+ * O túnel se anota nele ao subir e se apaga ao sair. É o processo que mais fica
+ * esquecido rodando — e o único cuja porta, tomada por outro, faz o projeto
+ * gravar no banco errado sem erro nenhum. Deixar isso para o Claude lembrar de
+ * anotar seria confiar numa frase; anotar aqui é um fato.
+ *
+ * Envolvido em try/catch porque **um registro quebrado não pode impedir alguém
+ * de desenvolver** — é a mesma regra de ouro dos hooks deste plugin.
+ */
+let portas = null;
+try {
+  portas = require('./portas.js');
+} catch {
+  portas = null;
+}
+
+function anota(fn) {
+  try {
+    if (portas) fn(portas);
+  } catch {
+    // silêncio: anotar é conveniência, o túnel é o serviço
+  }
+}
+
 const PADRAO_MCP = 'https://mcp.bridgeaibrasil.com.br';
 
 /**
@@ -372,6 +398,14 @@ async function main() {
   // Só 127.0.0.1. Escutar em 0.0.0.0 poria o banco do projeto ao alcance de
   // qualquer um na mesma rede — o café, o coworking, o wi-fi do prédio.
   servidor.listen(porta, '127.0.0.1', () => {
+    anota((p) =>
+      p.anotarAbertura({
+        porta,
+        oQue: app ? `túnel do banco de ${app} (${environment})` : 'túnel do banco (serve todos os projetos)',
+        comando: `node tunnel.js ${app ? `--app ${app}` : '--dev'}`,
+        pid: process.pid,
+      }),
+    );
     console.log(
       `Túnel aberto: 127.0.0.1:${porta} → ` +
         (app ? `banco de ${app} (${environment}).` : 'seu ambiente de desenvolvimento (todos os projetos).'),
@@ -400,12 +434,46 @@ async function main() {
   const servidorCache = net.createServer((local) => atende(local, wsUrlPara('cache')));
   servidorCache.on('error', (e) => morre(`Não consegui abrir a porta ${portaCache} do cache: ${e.message}`));
   servidorCache.listen(portaCache, '127.0.0.1', () => {
+    anota((p) =>
+      p.anotarAbertura({
+        porta: portaCache,
+        oQue: app ? `túnel do cache de ${app}` : 'túnel do cache (faixa de desenvolvimento)',
+        comando: `node tunnel.js ${app ? `--app ${app}` : '--dev'}`,
+        pid: process.pid,
+      }),
+    );
     console.log(
       `Túnel aberto: 127.0.0.1:${portaCache} → cache` +
         (app ? ` de ${app}` : '') +
         ' (faixa de desenvolvimento, separada da produção).',
     );
     console.log('Deixe esta janela aberta enquanto estiver desenvolvendo.');
+  });
+}
+
+/**
+ * Ao sair, apaga do registro as portas que ESTE processo abriu.
+ *
+ * `exit` não basta sozinho: um Ctrl+C manda SIGINT, e sem um ouvinte o Node
+ * encerra sem passar por aqui — que é justamente como esta janela costuma ser
+ * fechada. Por isso os três.
+ *
+ * E é por isso que o registro nunca é lido como verdade: SIGKILL, queda de
+ * energia e reinício não passam por lugar nenhum. Quem sabe se a porta está de
+ * pé é quem mede.
+ */
+function despedida() {
+  anota((p) => {
+    p.anotarFechamento(porta);
+    if (comCache) p.anotarFechamento(portaCache);
+  });
+}
+
+process.on('exit', despedida);
+for (const sinal of ['SIGINT', 'SIGTERM']) {
+  process.on(sinal, () => {
+    despedida();
+    process.exit(0);
   });
 }
 

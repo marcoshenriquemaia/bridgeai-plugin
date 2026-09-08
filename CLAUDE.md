@@ -127,6 +127,49 @@ O protocolo entre as duas pontas é testado em `mcp/src/tunnel.test.ts`, que
 reescreve este cliente em vez de importá-lo — se os dois divergirem, é lá que
 aparece.
 
+## O registro de portas
+
+[scripts/portas.js](scripts/portas.js) guarda em `~/.bridgeai/portas.json` o que
+está aberto na máquina. O `tunnel.js` se anota ao subir e se apaga ao sair, e o
+`load-platform.js` reporta o que sobrou no começo de cada sessão.
+
+**Ele fica em `~/.bridgeai/` e não dentro do projeto**, e essa é a decisão que
+faz ele servir para alguma coisa: porta é recurso da MÁQUINA. O conflito que
+mais dói é entre projetos — e o pior deles já está escrito no `CLAUDE.md` da
+plataforma: **se o túnel cair e outro Postgres tomar a 55432, a próxima conexão
+vai para o banco errado sem erro nenhum.** Um arquivo por projeto não enxerga
+isso, e o `/bridgeai:comecar` já mandava "se já tem um túnel de outro projeto,
+pule este passo" sem dar ao Claude nenhum jeito de saber.
+
+**O arquivo é uma afirmação; a verdade é medida.** Toda leitura conecta na porta
+e pergunta ao sistema quem atende (`netstat` no Windows, `lsof` nos outros).
+"Fechado" nunca sai da ausência de registro — sai de ninguém estar escutando, e é
+aí que a linha é apagada. Mesma disciplina do `probed: false` do `status`.
+
+⚠️ **Não existe comando de matar, e `portas.test.js` reprova quem acrescentar
+um.** O sistema recicla PID: encerrar o número anotado ontem é encerrar um
+processo qualquer hoje. O que este arquivo entrega é identidade — quem atende
+AGORA, com nome — para a decisão ser de quem está na frente da máquina. A única
+chamada a `process.kill` é com o sinal `0`, que não mata: só pergunta se o
+processo existe.
+
+## O `CLAUDE.md` do projeto do usuário
+
+[templates/projeto.md](templates/projeto.md) é a seção que o `/bridgeai:comecar`
+escreve no projeto — e que o `platform.md` manda acrescentar em projeto que já
+existe.
+
+Ele existe porque **estas regras chegam por um hook, que é por máquina, e o
+`CLAUDE.md` do projeto é por repositório**. Quem clona não recebe hook nenhum:
+foi assim que outro agente desenvolvendo aqui não descobriu que existia como
+acrescentar um ambiente, e que um app subiu na porta 3001 contra uma label que
+aponta a 3000.
+
+⚠️ **Nada que envelhece entra nele** — preço, MB, lista de ambientes. Isso muda
+no primeiro `provision_resource`, e ninguém volta para corrigir um arquivo no
+repositório de outra pessoa. O que envelhece se pergunta às ferramentas; o
+modelo só diz onde perguntar.
+
 ## O `.mcp.json` fica na raiz
 
 A documentação do Claude Code aceita dois lugares: um `.mcp.json` na **raiz do
@@ -144,3 +187,4 @@ instalação de verdade pelo marketplace, e ela depende do repositório público
   primeiro, ponteiro lá depois.
 - Domínio próprio: no servidor desde 06/09/2026, e no `rules/platform.md`. Não virou skill — o que o Claude precisa saber cabe em dois parágrafos, e o passo que decide é no painel do registrador do usuário
 - Teste do `load-platform.js` e do `tunnel.js`, no formato do `hooks.test.js`
+  (o `portas.js` já tem o dele, e o `tunnel.js` passou a depender dele)

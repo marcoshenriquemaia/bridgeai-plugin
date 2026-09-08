@@ -42,6 +42,20 @@ com `dev_credentials`.
 olhe o log antes de tentar de novo — subir duas vezes só produz um erro de porta
 ocupada em cima do erro real.
 
+**8. Portas** — `node "${CLAUDE_PLUGIN_ROOT}/scripts/portas.js"`. Ele mede o que
+está de pé e de qual projeto é. Duas coisas para procurar, e a segunda é a que
+estraga dado:
+
+- **Um servidor da sessão passada** ainda ocupando a porta. O sintoma é
+  "mudei e não mudou nada": o navegador está numa porta e o processo novo em
+  outra.
+- **Algo atendendo na 55432 que não é o nosso túnel** — um Postgres local, em
+  Docker ou instalado. O `.env` do projeto aponta para lá: as consultas e as
+  migrations vão para esse banco, sem erro nenhum aparecer.
+
+Encerrar qualquer processo é decisão do usuário, e o PID que vale é o que ESTÁ
+atendendo — nunca o anotado, porque o sistema recicla PID.
+
 ## Se o projeto for de app de celular
 
 Aqui existem **dois canais independentes**, e confundi-los é a origem da maioria dos

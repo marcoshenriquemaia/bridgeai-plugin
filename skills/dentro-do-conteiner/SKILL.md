@@ -50,6 +50,14 @@ memória do item servidor (o app é derrubado ao estourar — `status` mostra
 quanto falta), e a CPU proporcional à memória (no teto, o kernel só atrasa o
 app, sem erro nenhum; é a lentidão que não deixa rastro).
 
+⚠️ **Estourar a memória não deixa rastro no log.** O kernel mata o processo no
+meio do que ele estava fazendo: não há exceção, não há linha escrita, e a
+política de reinício levanta o contêiner — o site volta e ninguém viu nada. Se
+o app "cai sozinho de vez em quando", `status` é quem conta: ele diz quantas
+vezes o servidor caiu e se já foi derrubado por memória. A causa mais comum
+neste público é ler um arquivo inteiro para a memória antes de responder — a
+seção de armazenamento adiante mostra o caminho em fluxo.
+
 ## O Dockerfile
 
 Um só estágio serve; dois é melhor para a imagem ficar pequena (a publicação
