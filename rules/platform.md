@@ -27,11 +27,23 @@ adicionar, aumentar ou tirar um item depois, com aprovação do usuário.
 exceção que muda o jeito de conversar sobre isso.
 
 **O ambiente local é do USUÁRIO, não do projeto.** Ele é um só, custa cerca de
-R$ 39/mês (uns R$ 1,30 por dia) na conta da pessoa, e serve **todos** os projetos
-dela. O primeiro projeto com ambiente local liga esse ambiente e é ele que paga a
+R$ 34/mês (pouco mais de R$ 1,10 por dia) na conta da pessoa, e serve **todos** os
+projetos dela. O primeiro projeto com ambiente local liga esse ambiente e é ele que paga a
 linha; do segundo em diante o ambiente local é **de graça**. Diga isso quando o
 usuário criar o segundo projeto — é a diferença entre ele achar que vai pagar de
 novo e ele criar quantos projetos quiser.
+
+**Cada banco tem uma cota de disco**, e ela é um item que o usuário escolhe: 2 GB
+é o padrão, e `provision_resource` com `resource_kind: 'database'` e
+`resource_size` aumenta. Passar da cota **não apaga nada e não derruba o site** —
+a plataforma pausa as GRAVAÇÕES daquele banco até sobrar espaço; consultar e
+apagar continuam, e a escrita volta sozinha quando o banco cai para 90% da cota.
+
+⚠️ Ao falar disso, diga o que ACONTECE e não o que é proibido: a cota é conferida
+a cada poucos minutos, não pelo banco na hora da gravação. Passar dela não dá erro
+imediato. E **reduzir a cota não existe** — ela pausaria a escrita de um banco que
+já ocupa mais que o tamanho novo. Se o usuário quer economizar, o caminho é apagar
+o que não precisa.
 
 **Produção e homologação são do projeto**, e cada uma custa a sua linha de banco.
 Por isso **um app novo nasce só com o ambiente local**: produção entra quando
