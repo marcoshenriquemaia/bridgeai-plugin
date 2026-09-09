@@ -23,6 +23,34 @@ precisar) e armazenamento de arquivos (se precisar) — e seus **ambientes**
 precisa, item por item, e o que não foi pedido não entra e não paga. Dá para
 adicionar, aumentar ou tirar um item depois, com aprovação do usuário.
 
+**Um projeto pode ter mais de um PROCESSO.** O servidor que você contrata é o
+**web**: é ele que responde no endereço do projeto. Um app com fila, cron ou
+processamento pesado pode ter processos ao lado dele — um `worker`, por exemplo.
+Todos rodam **a mesma imagem** (quem publica manda um tarball só) com o **mesmo
+banco, o mesmo cache e o mesmo armazenamento**; o que os separa é o comando.
+
+- Um processo extra **não tem endereço na internet**, e isso é desenho: ele não
+  recebe `PORT`, não entra no Traefik e não responde a ninguém de fora. O jeito
+  de saber o que ele está fazendo é `logs` com `process`.
+- Ele custa como um servidor do tamanho dele, **por ambiente servido** — um app
+  com produção e homologação tem dois contêineres de worker e paga dois.
+- Contrate com `provision_resource` (`resource_kind: 'server'`, `resource_name`,
+  `resource_size` e `resource_command`), ou já no `create_app`, em `processes`.
+- ⚠️ **Só peça um se o projeto realmente precisa.** Uma fila que roda de minuto
+  em minuto cabe dentro do próprio app; o worker se paga quando o trabalho é
+  pesado o bastante para engasgar a API, ou quando ele precisa continuar rodando
+  enquanto o site atende. Cote com `estimate_cost` e diga o número antes.
+
+**E mais de um ARMAZENAMENTO**, quando o projeto precisa separar arquivos que
+não se misturam. O app escolhe qual usar pedindo a URL com o nome do bucket. Na
+dúvida, um só.
+
+**Banco e cache continuam sendo um por projeto** (o banco, um por ambiente). Não
+é esquecimento: cada banco a mais ocupa uma vaga da instância compartilhada, que
+é o gargalo da plataforma, e um segundo cache seria uma segunda linha na conta
+sem um segundo pedaço de memória por trás. Para separar dados, use um schema no
+mesmo banco; para separar chaves, um prefixo no cache que já existe.
+
 **Cada ambiente é um banco de dados próprio, e cada um tem preço** — com uma
 exceção que muda o jeito de conversar sobre isso.
 
@@ -157,10 +185,10 @@ dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arqui
 | Ver a CONTA dele | `account_status` — saldo, fôlego, ambiente de dev e e-mail de aviso. É a única que responde para quem **ainda não tem projeto** |
 | Ver o banco por dentro | `describe_schema` — colunas, tipos, chaves. **Antes de qualquer consulta ou migration** |
 | Antes de gastar | `estimate_cost`, `current_cost` |
-| Investigar | `query` (só leitura), `logs` (com `since_minutes` para uma janela de tempo, e `contains` para procurar um texto) |
+| Investigar | `query` (só leitura), `logs` (com `since_minutes` para uma janela de tempo, `contains` para procurar um texto, e `process` para o log de um worker) |
 | Configurar | `dev_credentials`, `request_variable`, `list_variables`, `set_health_path` |
 | Criar projeto | `create_app` |
-| Mudar os itens | `provision_resource` (adiciona ou aumenta, inclusive AMBIENTE), `reduce_resource` (deixa menor), `remove_resource` (tira) |
+| Mudar os itens | `provision_resource` (adiciona ou aumenta, inclusive AMBIENTE e PROCESSO), `reduce_resource` (deixa menor), `remove_resource` (tira) |
 | Consertar o que está no ar | `restart_app` (app travado), `rollback_deploy` (publicação quebrada) |
 | Apagar projeto | `remove_app` |
 | Apresentar antes de construir | `publish_preview`, `preview_comments` |
@@ -194,7 +222,11 @@ segunda chamada. Para mudar qualquer coisa, peça um link novo.
 de disco de 5 para 2 GB); **`remove_resource` tira um** (cache ou armazenamento
 — tirar o servidor é `remove_app`, e ambiente não sai por aqui). As três
 EXECUTAM só: quem propõe é `gerar_link_aprovacao`, com `resource_kind` e o
-`resource_size` — ou `environment`, quando o item é um ambiente. **Elas podem
+`resource_size` — ou `environment`, quando o item é um ambiente, ou
+`resource_name` (mais `resource_command`, ao criar) quando é um PROCESSO ou um
+armazenamento a mais. Um processo extra **sai** por `remove_resource`: ao
+contrário do servidor principal, tirá-lo não despublica nada — o site continua
+no ar. **Elas podem
 reiniciar o app** — cache e armazenamento entram no ambiente do contêiner, e
 mudar o tamanho do servidor recria com o limite novo; ambiente novo, cota de
 disco e cache ou armazenamento MENOR não reiniciam nada. Diga isso ao usuário

@@ -1,6 +1,6 @@
 ---
 name: dentro-do-conteiner
-description: O que o servidor de um app na BridgeAI recebe, exige e proíbe — porta, variáveis, disco somente leitura, o que o cache deixa fazer, como subir e ler arquivo do armazenamento, e como rodar migration em produção. Use ANTES de escrever ou mudar o Dockerfile, uma rota de upload ou download, uma fila, um cron, uma migration, ou quando o app funciona na máquina do usuário e quebra publicado.
+description: O que o servidor de um app na BridgeAI recebe, exige e proíbe — porta, variáveis, disco somente leitura, o que o cache deixa fazer, como subir e ler arquivo do armazenamento, como rodar migration em produção e como escrever um processo separado (worker, cron). Use ANTES de escrever ou mudar o Dockerfile, uma rota de upload ou download, uma fila, um cron, uma migration, ou quando o app funciona na máquina do usuário e quebra publicado.
 ---
 
 # Dentro do contêiner
@@ -14,7 +14,7 @@ plataforma entrega hoje — não é recomendação, é contrato.
 
 | Variável | O que é |
 |---|---|
-| `PORT` | **`3000`.** É onde o roteador bate. O app PRECISA escutar em `process.env.PORT` — um app na 3001 sobe saudável e o site responde 502 |
+| `PORT` | **`3000`.** É onde o roteador bate. O app PRECISA escutar em `process.env.PORT` — um app na 3001 sobe saudável e o site responde 502. **Um processo extra (worker) não recebe esta variável**, e a ausência é a mensagem: ninguém bate nele |
 | `DATABASE_URL` | `postgresql://…?sslmode=require`. Prisma, Drizzle, Knex e o resto funcionam como está. **Só o driver `pg` direto** lê `require` como `verify-full` e morre em "self-signed certificate": acrescente `&uselibpqcompat=true` |
 | `REDIS_URL` | Só se o app tem cache. `redis://usuario:senha@host:6379`, usuário com chaves só na faixa dele |
 | `STORAGE_TOKEN`, `STORAGE_SIGN_URL`, `STORAGE_BUCKET` | Só se o app tem armazenamento. Ver "Arquivos" abaixo — **não há chave S3**, e não há como listar o bucket |
@@ -129,6 +129,39 @@ datasource db {
 usuário destruiria aquele banco, em silêncio, no comando que ele roda todo dia.
 Se a variável não estiver no `.env`, chame `dev_credentials` de novo; não invente
 um endereço.
+
+## Mais de um processo (worker, cron)
+
+Um projeto pode contratar processos ALÉM do web. Todos rodam **a mesma imagem** —
+quem publica manda um tarball só — e o que os separa é o **comando**, declarado
+ao contratar (`resource_command`, por exemplo `["npm", "run", "worker"]`).
+
+O que muda dentro do contêiner de um processo extra:
+
+| | Web | Processo extra |
+|---|---|---|
+| `PORT` | `3000` | **não recebe** — não há ninguém batendo nele |
+| Endereço na internet | sim | **não**, e nem por outro caminho |
+| `DATABASE_URL`, `REDIS_URL`, `STORAGE_TOKEN` | sim | **os mesmos** |
+| Coleiras (memória, `pids`, disco somente leitura) | sim | **as mesmas** |
+| Como saber o que ele fez | log e o domínio | **só o log** (`logs` com `process`) |
+
+Como escrever o app para isso:
+
+- **O comando precisa existir na imagem.** Um `npm run worker` exige o script
+  `worker` no `package.json` do projeto, e ele precisa sobreviver ao build —
+  numa imagem multi-stage, o `package.json` tem que estar no estágio final.
+- **O processo tem que ficar de pé.** Um comando que roda e termina faz o
+  contêiner sair, e a política de reinício o levanta de novo num laço. Para
+  tarefa periódica, um laço com espera dentro do próprio processo (ou uma fila
+  com repetição, como o BullMQ) — e não um comando que sai.
+- **Ele compete com o web pelo banco e pelo cache**, que são os mesmos. Uma
+  varredura pesada no worker pode deixar o site lento; use os mesmos cuidados de
+  índice e limite que você usaria numa rota.
+- **Sem `PORT`, não abra servidor HTTP.** Se o processo precisa de um `/health`
+  próprio, ele é web e devia ser um app à parte — não um processo extra.
+- **Migration continua sendo do web** (ver "Migration em produção"). Rodá-la
+  também no worker faz os dois competirem pelo lock do banco no arranque.
 
 ## Cache (Redis)
 
