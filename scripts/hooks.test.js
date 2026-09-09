@@ -38,26 +38,36 @@ const decisao = (out) => {
 
 const chamada = (tool, input) => JSON.stringify({ tool_name: tool, tool_input: input });
 
-test('require-approval: sem código, nega e explica o caminho', () => {
+test('require-approval: sem pedido autorizado, nega e explica o caminho', () => {
   const r = roda('require-approval.js', chamada('mcp__bridgeai__remove_app', { app: 'loja' }));
   assert.equal(r.exit, 0);
   assert.equal(decisao(r.out), 'deny');
   const razao = JSON.parse(r.out).hookSpecificOutput.permissionDecisionReason;
   assert.match(razao, /remove_app/);
-  assert.match(razao, /painel/);
+  assert.match(razao, /aguardar_aprovacao/);
   assert.match(razao, /Não invente/);
+  // ⚠️ E não pode mandar copiar nada. O passo saiu em 09/09/2026, e esta
+  // mensagem é justamente o texto que o Claude lê quando está bloqueado —
+  // ressuscitar o copia-e-cola aqui desfaria o trabalho em silêncio.
+  assert.doesNotMatch(razao, /copiar|copie/i);
 });
 
-test('require-approval: código inventado é o mesmo que nenhum', () => {
-  for (const token of ['inventado', 'BAI-abc', 'BAI-12345678X', '']) {
-    const r = roda('require-approval.js', chamada('mcp__bridgeai__provision_resource', { approval_token: token }));
+test('require-approval: número fora de forma é o mesmo que nenhum', () => {
+  // ⚠️ O código antigo entra na lista de propósito: uma sessão com o texto
+  // velho na cabeça tentaria `approval_token`, e isso tem que NEGAR — senão a
+  // porta que foi fechada em 09/09/2026 continua entreaberta neste hook.
+  for (const entrada of [
+    { approval_id: 0 }, { approval_id: -3 }, { approval_id: 1.5 },
+    { approval_id: 'BAI-A2B3C4D5' }, { approval_token: 'BAI-A2B3C4D5' }, {},
+  ]) {
+    const r = roda('require-approval.js', chamada('mcp__bridgeai__provision_resource', entrada));
     assert.equal(r.exit, 0);
-    assert.equal(decisao(r.out), 'deny', `aceitou "${token}"`);
+    assert.equal(decisao(r.out), 'deny', `aceitou ${JSON.stringify(entrada)}`);
   }
 });
 
-test('require-approval: com código no formato do painel, pede confirmação', () => {
-  const r = roda('require-approval.js', chamada('mcp__bridgeai__remove_resource', { approval_token: 'BAI-A2B3C4D5' }));
+test('require-approval: com o número do pedido, pede confirmação', () => {
+  const r = roda('require-approval.js', chamada('mcp__bridgeai__remove_resource', { approval_id: 42 }));
   assert.equal(r.exit, 0);
   assert.equal(decisao(r.out), 'ask');
   assert.match(JSON.parse(r.out).hookSpecificOutput.permissionDecisionReason, /remove_resource/);
