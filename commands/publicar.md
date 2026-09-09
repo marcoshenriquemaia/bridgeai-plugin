@@ -40,6 +40,16 @@ o vínculo não acontece — e não deve. Nesse caso, e só nesse, o caminho é 
 publicação do painel: ele continua existindo. Diga isso com todas as letras em vez
 de deixar a Action falhar com 404.
 
+Abra a página do token para ele, em vez de mandá-lo procurar:
+
+```
+node "${CLAUDE_PLUGIN_ROOT}/scripts/abrir.js" "https://painel.bridgeaibrasil.com.br/projeto/<app>/configuracao#publicacao"
+```
+
+Ele gera ali, e cola em `Settings → Secrets and variables → Actions` do
+repositório, como `BRIDGEAI_DEPLOY_TOKEN`. **O token aparece uma vez só** — se
+ele perder, é gerar outro (o anterior morre).
+
 ## 3. O Dockerfile
 
 Se não existir, escreva um seguindo a skill **`dentro-do-conteiner`** — ela é o

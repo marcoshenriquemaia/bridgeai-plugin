@@ -72,7 +72,21 @@ navegador abrindo no GitHub. O acesso é gravado no ambiente da máquina e **nun
 aparece na tela** — não tente lê-lo. Terminou, peça para fechar e abrir o Claude
 Code e rodar este comando de novo. É a única interrupção do caminho, e é uma só.
 
-## Etapa 3 — Entender o projeto
+## Etapa 3 — Ver a conta, e só então entender o projeto
+
+**Comece por `account_status`.** Ela diz o saldo, o fôlego, se o ambiente de
+desenvolvimento está ligado e se há e-mail para aviso — e é a única ferramenta
+que responde para quem ainda não tem projeto nenhum.
+
+⚠️ **Por que antes e não depois:** criar exige pelo menos R$ 10 de crédito. Sem
+essa consulta, o caminho é conversar sobre o projeto, escolher o tamanho, gerar
+o pedido de aprovação, mandar ele autorizar — e só então ouvir "não tem saldo".
+Sabendo antes, você diz na primeira frase quanto ele precisa pôr e **abre a
+página de recarga para ele** (a resposta traz o endereço; a regra de abrir está
+no `platform.md`).
+
+Se o saldo estiver zerado, diga o número redondo: **uns R$ 90 cobrem o primeiro
+mês de um projeto pequeno.** Ele recarrega por Pix em um minuto, e vocês seguem.
 
 Antes de criar qualquer coisa, descubra o que ele quer construir. Pergunte sobre o
 negócio, não sobre tecnologia: o que o site faz, quem usa, vende alguma coisa,
@@ -109,11 +123,9 @@ Não existe plano. Um site pequeno é `server_mb: 512`; cache só se o projeto t
 fila, sessão ou algo que precise de memória rápida; armazenamento só se guarda
 arquivo. Na dúvida, menos: dá para adicionar depois, com `provision_resource`.
 
-**Saldo vem antes.** `create_app` recusa sem R$ 10 de crédito e três dias de fôlego
-contando o app novo, e diz quanto tem e onde recarregar. Se for o primeiro app da
-conta, não há como consultar antes: chame, e se recusar, repasse a frase com o link
-do painel (https://painel.bridgeaibrasil.com.br) e espere ele recarregar. Uns R$ 90
-cobrem o primeiro mês de um projeto pequeno; diga esse número.
+**Saldo vem antes, e você já conferiu na etapa 3.** `create_app` recusa sem R$ 10
+de crédito e três dias de fôlego contando o app novo. Se recusar mesmo assim,
+repasse a frase — ela vem com o endereço da recarga, e você **abre** para ele.
 
 O que nasce: banco, cache, armazenamento e o ambiente local. **O site NÃO fica no ar
 aqui** — publicar é a etapa 7. Diga isso na hora, para ele não abrir o endereço e
@@ -247,6 +259,16 @@ Siga o `/bridgeai:publicar` — ele é este passo inteiro, e é retomável. Em r
    contêiner — uns 30 segundos, e cerca de um minuto na primeira vez. Acompanhe com
    `gh run watch --exit-status`, e não mandando ele abrir a aba Actions.
 3. **`status`, e só então o endereço** `https://<app>.bridgeaibrasil.com.br`.
+
+## Etapa 8 — As configurações que só ele tem
+
+Se o projeto precisa de chave de outro serviço — Stripe, OpenAI, e-mail —, use
+`request_variable`, uma por chamada. A resposta vem com o endereço do formulário
+daquele pedido: **abra no navegador dele** e diga em uma frase o que preencher.
+Depois de preencher, ele clica em "Aplicar agora" na mesma página, e o app
+reinicia por alguns segundos com o valor.
+
+Nunca peça a chave no chat, e não a aceite se ele mandar.
 
 ⚠️ Repositório de **organização** é a exceção: o vínculo automático compara o dono
 do repositório com o dono do app, então ele não acontece ali. Só nesse caso use o
