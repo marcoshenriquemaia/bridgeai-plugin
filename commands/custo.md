@@ -31,6 +31,19 @@ abre há semanas, tamanho maior do que o consumo real justifica. **Com o valor d
 economia.** Se não houver nada a cortar, diga que está enxuto — é uma informação
 boa, não uma resposta vazia.
 
+**E não pare no diagnóstico: o caminho existe.** Um servidor grande demais vira
+`reduce_resource`, e o mesmo vale para a cota de disco, o cache e o
+armazenamento. Chame `status` para ver quanto o app usa de verdade, cote com
+`estimate_cost`, diga o valor da economia, e peça o link de aprovação. **Nunca
+sugira apagar o projeto e criar outro menor** — a plataforma sabe encolher, e
+recriar custaria os dados.
+
+⚠️ **A plataforma mede antes de aceitar, e pode recusar** — se o app já usa mais
+memória do que o teto novo, ou se o banco já ocupa mais que a cota nova. Se vier
+um aviso de que ficou apertado, repasse com a ressalva: a medição é de agora e
+não conhece o pico dele. Reduzir o servidor reinicia o app; a cota de disco, o
+cache menor e o armazenamento menor não reiniciam nada.
+
 **Ambiente parado é a linha mais fácil de esquecer.** Cada ambiente é um banco de
 dados próprio e custa cerca de R$ 39/mês. Homologação que ninguém abre há um mês
 é dinheiro correndo — **diga o valor**.
@@ -42,11 +55,13 @@ ofereça "cortar o ambiente local deste projeto": não é um item do projeto, e
 desativar o ambiente inteiro apaga os bancos de desenvolvimento de todos os
 projetos dela, na hora. Se ela quiser isso, é no painel, e diga o que se perde.
 
-⚠️ **E não ofereça tirar produção ou homologação: a plataforma não sabe.**
+⚠️ **E não ofereça TIRAR produção ou homologação: a plataforma não sabe.**
 Apagar o banco de um ambiente apagaria os dados dele, e o único caminho de
 eliminação é `remove_app`, que leva o projeto inteiro. Mostrar o número e dizer
-que reduzir aquilo passa pelo suporte é honesto; prometer o corte e descobrir na
-hora que não dá é o gesto que faz alguém parar de confiar na conta.
+que aquele ambiente só sai com o projeto é honesto; prometer o corte e descobrir
+na hora que não dá é o gesto que faz alguém parar de confiar na conta. O que dá
+para fazer com um ambiente caro é **encolher** o que ele consome — servidor e
+cota de disco, por `reduce_resource`.
 
 ## Se o projeto for de um cliente
 

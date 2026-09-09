@@ -41,9 +41,9 @@ apagar continuam, e a escrita volta sozinha quando o banco cai para 90% da cota.
 
 ⚠️ Ao falar disso, diga o que ACONTECE e não o que é proibido: a cota é conferida
 a cada poucos minutos, não pelo banco na hora da gravação. Passar dela não dá erro
-imediato. E **reduzir a cota não existe** — ela pausaria a escrita de um banco que
-já ocupa mais que o tamanho novo. Se o usuário quer economizar, o caminho é apagar
-o que não precisa.
+imediato. **Reduzir a cota existe** e é `reduce_resource` — mas ela é recusada se
+o banco já ocupa mais que o tamanho novo, porque a escrita seria pausada minutos
+depois. Nesse caso o caminho é apagar o que não precisa primeiro.
 
 **Produção e homologação são do projeto**, e cada uma custa a sua linha de banco.
 Por isso **um app novo nasce só com o ambiente local**: produção entra quando
@@ -145,7 +145,7 @@ Claude Code, por `/mcp` — um comando que só o usuário digita. Não há outro
 caminho, nenhum passa por colar token no chat, e nenhum passa por variável de
 ambiente.
 
-Estas vinte e duas existem hoje. **Chame só o que está nesta tabela** — se você tiver
+Estas vinte e três existem hoje. **Chame só o que está nesta tabela** — se você tiver
 dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arquivo.
 
 | Para | Use |
@@ -156,7 +156,7 @@ dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arqui
 | Investigar | `query` (só leitura), `logs` (com `since_minutes` para uma janela de tempo, e `contains` para procurar um texto) |
 | Configurar | `dev_credentials`, `request_variable`, `list_variables`, `set_health_path` |
 | Criar projeto | `create_app` |
-| Mudar os itens | `provision_resource` (adiciona ou aumenta, inclusive AMBIENTE), `remove_resource` (tira) |
+| Mudar os itens | `provision_resource` (adiciona ou aumenta, inclusive AMBIENTE), `reduce_resource` (deixa menor), `remove_resource` (tira) |
 | Consertar o que está no ar | `restart_app` (app travado), `rollback_deploy` (publicação quebrada) |
 | Apagar projeto | `remove_app` |
 | Apresentar antes de construir | `publish_preview`, `preview_comments` |
@@ -185,15 +185,24 @@ nome e os itens saem do pedido que ele leu na tela, e não do que você mandar n
 segunda chamada. Para mudar qualquer coisa, peça um link novo.
 
 **`provision_resource` adiciona ou aumenta UM item de um app já criado**
-(servidor maior, cache, armazenamento e **ambiente**); **`remove_resource` tira
-um** (cache ou armazenamento — servidor é `remove_app`, e ambiente não sai por
-aqui). As duas EXECUTAM só: quem propõe é `gerar_link_aprovacao`, com
-`resource_kind` e, ao adicionar, `resource_size` — ou `environment`, quando o
-item é um ambiente. **As duas podem reiniciar o app** — cache e armazenamento
-entram no ambiente do contêiner, e servidor maior recria com o limite novo;
-ambiente novo não reinicia nada. Diga isso ao usuário antes de mandar o link,
-não depois de executar. O que sai não é apagado: os arquivos do armazenamento
-ficam, só a cobrança para.
+(servidor maior, cache, armazenamento, cota de disco e **ambiente**);
+**`reduce_resource` deixa um item MENOR** (servidor de 2048 para 1024 MB, cota
+de disco de 5 para 2 GB); **`remove_resource` tira um** (cache ou armazenamento
+— tirar o servidor é `remove_app`, e ambiente não sai por aqui). As três
+EXECUTAM só: quem propõe é `gerar_link_aprovacao`, com `resource_kind` e o
+`resource_size` — ou `environment`, quando o item é um ambiente. **Elas podem
+reiniciar o app** — cache e armazenamento entram no ambiente do contêiner, e
+mudar o tamanho do servidor recria com o limite novo; ambiente novo, cota de
+disco e cache ou armazenamento MENOR não reiniciam nada. Diga isso ao usuário
+antes de mandar o link, não depois de executar. O que sai não é apagado: os
+arquivos do armazenamento ficam, só a cobrança para.
+
+**Quando o usuário quiser gastar menos, `reduce_resource` é o caminho — nunca
+mande ele apagar o projeto e criar de novo.** A plataforma mede antes de
+aceitar: se o app já usa mais memória do que o teto novo, ou se o banco já
+ocupa mais que a cota nova, o pedido é recusado com o número medido e o que
+fazer. Se a resposta vier com um aviso de que ficou apertado, repita a ressalva
+ao usuário: a medição é de agora e não conhece o pico dele.
 
 **É assim que um projeto ganha produção.** Um app nasce só com o ambiente
 local. Quando o usuário tiver o que publicar, chame `estimate_cost`
@@ -403,7 +412,7 @@ ela para de funcionar assim que o notebook fechar. Para app de celular, a skill
 ## Operação sem volta exige código de aprovação
 
 `execute_sql`, `apply_migration`, `remove_resource`, `remove_app`,
-`provision_resource` e `rollback_deploy` exigem `approval_token` — um código que o usuário copia do
+`provision_resource`, `reduce_resource` e `rollback_deploy` exigem `approval_token` — um código que o usuário copia do
 painel da BridgeAI. **Você não consegue gerá-lo**: o `gerar_link_aprovacao`
 devolve um link, e o código só passa a existir quando uma pessoa aperta
 "Autorizar" na tela dela. O link abre o pedido por cima do painel; se ele fechar
@@ -426,12 +435,13 @@ cinco dias na frase que acompanha o link, com todas as letras.
 Nesse meio-tempo a plataforma manda três e-mails, e cada um traz um link que
 cancela e devolve o projeto com os dados no lugar. Ou seja: **dá para voltar
 atrás durante cinco dias, e não dá para voltar atrás depois.** Se o usuário só
-quer parar de gastar, este não é o caminho — `remove_resource` tira um item, e
-ficar sem crédito pausa os apps sem apagar nada. Ofereça isso antes.
+quer parar de gastar, este não é o caminho — `reduce_resource` deixa um item
+menor, `remove_resource` tira um, e ficar sem crédito pausa os apps sem apagar
+nada. Ofereça isso antes.
 
-`provision_resource` e `remove_resource` **existem**, e para elas o pedido
-precisa de mais uma coisa: `resource_kind` (server, cache ou bucket) e, ao
-adicionar, `resource_size`. Sem isso o código autorizaria "mudar alguma coisa"
+`provision_resource`, `reduce_resource` e `remove_resource` **existem**, e para
+elas o pedido precisa de mais uma coisa: `resource_kind` (server, database,
+cache ou bucket) e, ao adicionar ou reduzir, `resource_size`. Sem isso o código autorizaria "mudar alguma coisa"
 e não "ESTE item, DESTE tamanho" — a pessoa leria "cache de 64 MB" na tela, e a
 execução não teria como saber se era aquilo mesmo. Combine o item e o tamanho
 com o usuário ANTES de chamar `gerar_link_aprovacao`, com o número do
