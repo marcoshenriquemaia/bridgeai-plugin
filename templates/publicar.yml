@@ -153,3 +153,10 @@ jobs:
           if [ "$(jq -r .healthy /tmp/resultado.json)" != "true" ]; then
             echo "::warning::$(jq -r .warning /tmp/resultado.json)"
           fi
+
+          # Os processos extras (worker, fila) que não acompanharam a imagem
+          # nova. Também é aviso, e pela mesma razão: o site está no ar com o
+          # código novo. Sem esta linha o único jeito de descobrir seria o
+          # `status`, e quem publicou já teria ido embora.
+          jq -r '.processWarnings // [] | .[]' /tmp/resultado.json \
+            | while IFS= read -r aviso; do echo "::warning::$aviso"; done
