@@ -186,13 +186,26 @@ if (!token) {
 const comCache = 'cache' in opt || doEnvDoProjeto('BRIDGEAI_TUNNEL_CACHE') !== null;
 const portaCache = Number(opt['cache-port'] || PORTA_CACHE_PADRAO);
 
+// ⚠️ **O cache é de UM projeto, mesmo no modo conta.** Desde 09/09/2026 cada
+// projeto tem o seu Redis (`app-<id>-cache`), então o túnel de cache precisa
+// saber de qual projeto é — o de banco não precisa, porque o Postgres escolhe
+// o database na abertura da conexão e o servidor é um só. Com `--app` é ele;
+// sem `--app`, é o `BRIDGEAI_APP` que o `dev_credentials` grava no `.env` da
+// pasta de onde este script rodou. Sem nenhum dos dois, o túnel de cache não
+// tem para onde ir, e diz isso em vez de subir uma porta que não leva a nada.
+const appDoCache = app || doEnvDoProjeto('BRIDGEAI_APP');
+
 /** A query do pedido. Sem `app` é o modo conta — ver o aviso no topo. */
-const consulta = () =>
-  (app ? `app=${encodeURIComponent(app)}&` : '') +
+const consulta = (target = 'db') =>
+  (target === 'cache' && appDoCache
+    ? `app=${encodeURIComponent(appDoCache)}&`
+    : app
+      ? `app=${encodeURIComponent(app)}&`
+      : '') +
   `environment=${encodeURIComponent(environment)}`;
 
 const wsUrlPara = (target) =>
-  `${base.replace(/^http/, 'ws')}/tunnel?${consulta()}&target=${target}`;
+  `${base.replace(/^http/, 'ws')}/tunnel?${consulta(target)}&target=${target}`;
 const wsUrl = wsUrlPara('db');
 
 /**
@@ -203,7 +216,7 @@ const wsUrl = wsUrlPara('db');
  * que dá para dizer é "não deu" — e quem está do outro lado não programa.
  */
 async function conferir(target = 'db') {
-  const url = `${base}/tunnel/check?${consulta()}&target=${target}`;
+  const url = `${base}/tunnel/check?${consulta(target)}&target=${target}`;
   let res;
   try {
     res = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
@@ -416,6 +429,14 @@ async function main() {
 
   if (!comCache) return;
 
+  if (!appDoCache) {
+    morre(
+      'O .env pede o túnel de cache, mas não diz de qual projeto é o Redis.\n' +
+        'Rode de novo com --app <id>, ou peça ao Claude o dev_credentials de novo —\n' +
+        'ele grava BRIDGEAI_APP no .env, e é daí que este script lê.',
+    );
+  }
+
   // A segunda porta, para o cache. Mesmas três conferências do banco, pela
   // mesma razão: uma porta aberta sem nada atrás parece que funciona e falha
   // só quando o app for usar.
@@ -437,15 +458,14 @@ async function main() {
     anota((p) =>
       p.anotarAbertura({
         porta: portaCache,
-        oQue: app ? `túnel do cache de ${app}` : 'túnel do cache (faixa de desenvolvimento)',
+        oQue: `túnel do cache de ${appDoCache} (faixa de desenvolvimento)`,
         comando: `node tunnel.js ${app ? `--app ${app}` : '--dev'}`,
         pid: process.pid,
       }),
     );
     console.log(
-      `Túnel aberto: 127.0.0.1:${portaCache} → cache` +
-        (app ? ` de ${app}` : '') +
-        ' (faixa de desenvolvimento, separada da produção).',
+      `Túnel aberto: 127.0.0.1:${portaCache} → o Redis de ${appDoCache} ` +
+        '(faixa de desenvolvimento, separada da produção).',
     );
     console.log('Deixe esta janela aberta enquanto estiver desenvolvendo.');
   });

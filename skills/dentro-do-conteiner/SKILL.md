@@ -16,7 +16,7 @@ plataforma entrega hoje — não é recomendação, é contrato.
 |---|---|
 | `PORT` | **`3000`.** É onde o roteador bate. O app PRECISA escutar em `process.env.PORT` — um app na 3001 sobe saudável e o site responde 502. **Um processo extra (worker) não recebe esta variável**, e a ausência é a mensagem: ninguém bate nele |
 | `DATABASE_URL` | `postgresql://…?sslmode=require`. Prisma, Drizzle, Knex e o resto funcionam como está. **Só o driver `pg` direto** lê `require` como `verify-full` e morre em "self-signed certificate": acrescente `&uselibpqcompat=true` |
-| `REDIS_URL` | Só se o app tem cache. `redis://usuario:senha@host:6379`, usuário com chaves só na faixa dele |
+| `REDIS_URL` | Só se o app tem cache. `redis://usuario:senha@app-<id>-cache:6379` — um Redis SÓ deste projeto, na mesma rede do contêiner, com o usuário do ambiente e chaves só na faixa dele |
 | `STORAGE_TOKEN`, `STORAGE_SIGN_URL`, `STORAGE_BUCKET` | Só se o app tem armazenamento. Ver "Arquivos" abaixo — **não há chave S3**, e não há como listar o bucket |
 | O que o usuário guardou no painel | Chega como variável de ambiente com o nome pedido em `request_variable` |
 
@@ -165,22 +165,39 @@ Como escrever o app para isso:
 
 ## Cache (Redis)
 
-O usuário do app tem `+@all -@dangerous`: **não** faz `KEYS`, `FLUSHALL`,
-`FLUSHDB`, `CONFIG`, `DEBUG`, `SHUTDOWN`, `MONITOR`, nem enxerga chave fora da
-faixa dele. Consequências:
+O cache é **um Redis só deste projeto** (`app-<id>-cache`), ao lado do
+contêiner do app, com `maxmemory` no tamanho contratado e `noeviction`. Não há
+vizinho: nada que outro projeto grave encosta neste. O usuário do app tem
+`+@all -@dangerous`: **não** faz `KEYS`, `FLUSHALL`, `FLUSHDB`, `CONFIG`,
+`DEBUG`, `SHUTDOWN`, `MONITOR`, nem enxerga chave fora da faixa dele.
+Consequências:
 
 - **BullMQ** funciona, mas reclama no arranque por não conseguir `CONFIG GET
-  maxmemory-policy` — é aviso, não erro. A instância já está em `noeviction`.
+  maxmemory-policy` — é aviso, não erro. O Redis já está em `noeviction`.
 - `SCAN` com o prefixo do app funciona; `KEYS` não. Bibliotecas de sessão e
   rate-limit funcionam.
-- Não há `maxmemory` por app: o cache é fatia de uma instância compartilhada.
-  Use TTL em tudo.
-- **No ambiente local o cache vem pelo mesmo túnel**, numa faixa de chaves só
-  de desenvolvimento (`t:<app>-dev:*`), separada da produção. O
-  `dev_credentials` escreve `REDIS_URL` apontando para `127.0.0.1:56379` e o
-  `tunnel.js` abre essa segunda porta sozinho. Mesmo assim, faça o app
-  **tolerar `REDIS_URL` ausente** (cache em memória ou desligado): é o que o
-  mantém de pé quando o túnel cai no meio do trabalho.
+- **Cheio, ele recusa novas gravações** (`OOM command not allowed`) — deste
+  projeto, e só dele — até alguma chave expirar ou ser apagada; `GET` e `DEL`
+  continuam. Use TTL em tudo que é cache. Trate esse erro como "cache
+  indisponível", nunca como erro do usuário.
+- **Cache e FILA têm durabilidades diferentes, e o Redis é o mesmo.** O que
+  está nele sobrevive a um reinício (AOF, gravado a cada segundo). **Não**
+  sobrevive a mudar o projeto de máquina — o cache nasce vazio do outro lado —,
+  nem a `remove_app` seguido de purga. Se o projeto usa o Redis como fila
+  (BullMQ, jobs), dimensione o `cache_mb` pelo pior dia da fila, e não pelo de
+  hoje: fila não tem TTL, e cheia ela para de aceitar job.
+- **Mudar o tamanho do cache reinicia o Redis do projeto** por uns segundos,
+  sem perder o que estava nele. Pedir `dev_credentials` também (é como o
+  usuário de desenvolvimento entra). O app publicado reconecta sozinho —
+  ioredis e node-redis fazem isso por padrão; não desligue a reconexão.
+- **No ambiente local o cache vem pelo mesmo túnel**, num usuário só de
+  desenvolvimento (`t_<app>-dev`, faixa `t:<app>-dev:*`) DENTRO do mesmo Redis
+  do projeto — separado de produção por chave, e não por instância. O
+  `dev_credentials` escreve `REDIS_URL` apontando para `127.0.0.1:56379` e
+  grava `BRIDGEAI_APP`, que o `tunnel.js` lê para saber de qual projeto é o
+  Redis. Mesmo assim, faça o app **tolerar `REDIS_URL` ausente** (cache em
+  memória ou desligado): é o que o mantém de pé quando o túnel cai no meio do
+  trabalho.
 
 ## Arquivos (armazenamento)
 

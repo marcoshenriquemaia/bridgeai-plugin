@@ -47,9 +47,24 @@ dúvida, um só.
 
 **Banco e cache continuam sendo um por projeto** (o banco, um por ambiente). Não
 é esquecimento: cada banco a mais ocupa uma vaga da instância compartilhada, que
-é o gargalo da plataforma, e um segundo cache seria uma segunda linha na conta
-sem um segundo pedaço de memória por trás. Para separar dados, use um schema no
+é o gargalo da plataforma, e o cache já é um Redis só do projeto — um segundo
+seria outro processo para a mesma coisa. Para separar dados, use um schema no
 mesmo banco; para separar chaves, um prefixo no cache que já existe.
+
+**O cache é um Redis SÓ do projeto**, com o teto de memória no tamanho
+contratado (`cache_mb`) e sem vizinho: o que outro projeto grava não encosta no
+seu, e vice-versa. Duas coisas para dizer ao usuário antes de ele escolher o
+tamanho, porque são elas que separam **cache** de **fila**:
+
+- **Cheio, o Redis recusa novas gravações — deste projeto, e só dele —** até
+  alguma chave expirar ou ser apagada; leitura continua. Use TTL em tudo que é
+  cache. Fila (BullMQ) não tem TTL: se ela pode crescer, o tamanho do cache é o
+  tamanho da fila no pior dia, e não o de hoje.
+- **O que está nele sobrevive a reiniciar** (o Redis grava em disco), mas
+  **não sobrevive a mudar o projeto de máquina**: o cache nasce vazio do outro
+  lado. Cache é cache. Quem usa o Redis como fila precisa esvaziá-la antes de
+  qualquer mudança de máquina — e saber que aumentar ou reduzir o `cache_mb`
+  reinicia o Redis do projeto por uns segundos, sem perder o que estava nele.
 
 **Cada ambiente é um banco de dados próprio, e cada um tem preço** — com uma
 exceção que muda o jeito de conversar sobre isso.
@@ -409,8 +424,12 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --dev
 A ordem é: **`dev_credentials` e grave o `.env` primeiro; o túnel depois**, em
 segundo plano, rodando a partir da pasta do projeto. Se o app tem cache, o
 `.env` traz `REDIS_URL` também, e o mesmo túnel abre uma segunda porta
-(`56379`) para um Redis de desenvolvimento — faixa própria, separada da
-produção. Nada a mais para rodar.
+(`56379`) para um usuário de desenvolvimento no Redis do projeto — faixa de
+chaves própria, separada da produção. O `tunnel.js` lê o `BRIDGEAI_APP` do
+`.env` para saber de qual projeto é o Redis, então rode-o **da pasta do
+projeto**. Nada a mais para rodar. ⚠️ Pedir `dev_credentials` reinicia o Redis
+do projeto por uns dois segundos (é como o usuário novo entra nele); o app
+publicado reconecta sozinho — diga isso se o site estiver no ar com gente.
 
 **Se o app tem armazenamento, o `.env` traz `STORAGE_TOKEN`, `STORAGE_SIGN_URL`
 e `STORAGE_BUCKET`** — e ele não passa pelo túnel, vai direto pela internet.
