@@ -191,7 +191,7 @@ Claude Code, por `/mcp` — um comando que só o usuário digita. Não há outro
 caminho, nenhum passa por colar token no chat, e nenhum passa por variável de
 ambiente.
 
-Estas vinte e cinco existem hoje. **Chame só o que está nesta tabela** — se você tiver
+Estas vinte e seis existem hoje. **Chame só o que está nesta tabela** — se você tiver
 dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arquivo.
 
 | Para | Use |
@@ -206,6 +206,7 @@ dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arqui
 | Mudar os itens | `provision_resource` (adiciona ou aumenta, inclusive AMBIENTE e PROCESSO), `reduce_resource` (deixa menor), `remove_resource` (tira) |
 | Consertar o que está no ar | `restart_app` (app travado), `rollback_deploy` (publicação quebrada) |
 | Apagar projeto | `remove_app` |
+| Mudar de máquina | `move_app` — só quando `provision_resource` disser que não cabe onde o app mora |
 | Apresentar antes de construir | `publish_preview`, `preview_comments` |
 | Aprovação | `gerar_link_aprovacao`, `aguardar_aprovacao` (espera o clique), `aprovacoes_pendentes` |
 
@@ -254,6 +255,38 @@ aceitar: se o app já usa mais memória do que o teto novo, ou se o banco já
 ocupa mais que a cota nova, o pedido é recusado com o número medido e o que
 fazer. Se a resposta vier com um aviso de que ficou apertado, repita a ressalva
 ao usuário: a medição é de agora e não conhece o pico dele.
+
+**Onde o projeto mora é a plataforma que decide, e ela pode mudar isso.** A
+BridgeAI tem mais de uma máquina; `create_app` põe o projeto na que tem mais
+espaço, e o primeiro deploy troca de máquina sozinho se a escolhida encheu
+nesse meio-tempo. O usuário não escolhe máquina, não vê máquina, e a conta é a
+mesma em qualquer uma. Duas coisas para acertar:
+
+- **`provision_resource` pode ser recusado por falta de espaço na máquina onde
+  o app mora.** A recusa vem já no `gerar_link_aprovacao`, diz quanto sobra lá
+  e aponta `move_app`. A plataforma **não move sozinha** no meio de um
+  provisionamento — seriam dois piscas sem ninguém pedir. Explique e deixe o
+  usuário decidir.
+- **`move_app` leva o projeto para a máquina compartilhada com mais espaço**,
+  com aprovação, e o destino é escolhido pela plataforma (peça o link com
+  `operation: "move_app"` e sem `resource_kind`). Antes de mandar o link, diga
+  **as duas coisas, com todas as letras**: o site fica **cerca de 35 segundos
+  fora do ar**, e **o cache nasce vazio** na máquina nova — se o app usa o Redis
+  como fila, ele precisa esvaziá-la antes. A conta não muda. Só quem administra
+  o projeto move.
+
+**A tática de uma data com muito acesso** (promoção, lançamento, Black Friday),
+na ordem que não derruba o site na hora errada:
+
+1. **Uma semana antes**: se vai precisar de worker, crie-o agora
+   (`provision_resource` com `resource_name`) — processo novo recria o web, e
+   isso pisca.
+2. **Antes da data, se não couber**: `move_app`. Nunca durante — meio minuto
+   fora do ar no meio do pico é o que a pessoa não quer.
+3. **Na data**: só AUMENTAR tamanho (`provision_resource` de servidor ou
+   processo que já existe). Aumentar não pisca o web.
+4. **Depois**: `reduce_resource` e `remove_resource` — a cobrança é por hora, e
+   o que ficar contratado continua pagando.
 
 **É assim que um projeto ganha produção.** Um app nasce só com o ambiente
 local. Quando o usuário tiver o que publicar, chame `estimate_cost`
@@ -497,8 +530,8 @@ ela para de funcionar assim que o notebook fechar. Para app de celular, a skill
 ## Operação sem volta exige o clique do usuário
 
 `execute_sql`, `apply_migration`, `remove_resource`, `remove_app`,
-`provision_resource`, `reduce_resource` e `rollback_deploy` exigem `approval_id`
-— o número de um pedido que o usuário **autorizou no painel**.
+`provision_resource`, `reduce_resource`, `rollback_deploy` e `move_app` exigem
+`approval_id` — o número de um pedido que o usuário **autorizou no painel**.
 
 São três passos, e **o usuário não copia nada**:
 

@@ -66,6 +66,22 @@ test('require-approval: número fora de forma é o mesmo que nenhum', () => {
   }
 });
 
+test('require-approval: move_app está na lista do hook, e sem pedido é negado', () => {
+  // ⚠️ O `matcher` do `hooks.json` é a lista de ferramentas que passam por
+  // este hook. Uma operação sem volta que não esteja nela nasce SEM o portão —
+  // e `move_app` (09/09/2026) deixa o site meio minuto fora do ar e esvazia o
+  // cache. O teste lê o arquivo de verdade em vez de repetir a lista.
+  const hooks = JSON.parse(require('node:fs').readFileSync(path.join(__dirname, '..', 'hooks', 'hooks.json'), 'utf8'));
+  const matcher = hooks.hooks.PreToolUse.find((h) => h.matcher.includes('require-approval') || h.hooks.some((x) => x.command.includes('require-approval'))).matcher;
+  assert.ok(new RegExp(matcher).test('mcp__bridgeai__move_app'), `move_app não está no matcher: ${matcher}`);
+  assert.ok(new RegExp(matcher).test('mcp__bridgeai__remove_app'));
+
+  const r = roda('require-approval.js', chamada('mcp__bridgeai__move_app', { app: 'loja' }));
+  assert.equal(r.exit, 0);
+  assert.equal(decisao(r.out), 'deny');
+  assert.match(JSON.parse(r.out).hookSpecificOutput.permissionDecisionReason, /move_app/);
+});
+
 test('require-approval: com o número do pedido, pede confirmação', () => {
   const r = roda('require-approval.js', chamada('mcp__bridgeai__remove_resource', { approval_id: 42 }));
   assert.equal(r.exit, 0);
