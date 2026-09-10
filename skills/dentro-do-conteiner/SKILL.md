@@ -163,6 +163,43 @@ Como escrever o app para isso:
 - **Migration continua sendo do web** (ver "Migration em produção"). Rodá-la
   também no worker faz os dois competirem pelo lock do banco no arranque.
 
+## Com mais de uma réplica
+
+O web pode ter até 4 réplicas: contêineres **iguais**, com a mesma imagem e o
+mesmo ambiente, atendendo o mesmo endereço. A plataforma reparte as
+requisições entre elas e tira do rodízio a que parar de responder no caminho
+de saúde. Publicar troca **uma por vez**, conferindo cada uma antes da
+seguinte — é o que faz o site não sair do ar ao atualizar.
+
+O que isso exige do código, e nada disso dá erro quando está errado:
+
+- **Sessão e qualquer estado compartilhado vão no Redis, nunca em memória.**
+  Duas requisições da mesma pessoa podem cair em réplicas diferentes; um
+  login guardado num `Map` do processo "some" a cada clique. Bibliotecas de
+  sessão têm store para Redis — use o `REDIS_URL` que já vem.
+- **Nada em disco local.** O `/tmp` de uma réplica não é o `/tmp` da outra.
+  Um upload que grava em `/tmp` numa requisição e lê na seguinte quebra sem
+  mensagem: o arquivo está na outra réplica. Arquivo vai para o armazenamento
+  (a seção abaixo); o que é temporário de UMA requisição pode ficar no `/tmp`.
+- **Por cerca de um minuto, o código antigo e o novo rodam JUNTOS, contra o
+  mesmo banco.** É o tempo de a publicação trocar as réplicas. Então uma
+  migration precisa ser compatível com o código anterior: acrescentar coluna,
+  nunca renomear ou apagar numa mesma publicação (acrescente agora, migre os
+  dados, apague na próxima). Uma migration que renomeia derruba as réplicas
+  ainda na versão anterior no meio da troca.
+- **A migration roda uma vez por réplica que sobe, no arranque.** Use o lock
+  que o ORM já usa (Prisma e Drizzle travam por advisory lock) — sem ele, duas
+  réplicas subindo juntas correm a mesma migration duas vezes.
+- **`/health` precisa responder só quando o app está pronto** para atender
+  (banco alcançado, migration terminada). Uma réplica que responde 200 antes
+  de estar pronta entra no rodízio e devolve erro a quem cair nela.
+- **Cron ou tarefa periódica no web roda em CADA réplica.** Com três réplicas,
+  três vezes. Tarefa que não pode duplicar vai para um processo extra (que não
+  tem réplica) ou trava por lock no Redis.
+
+Com uma réplica só, nada disso é obrigatório — mas escrever assim desde o
+começo é o que deixa o projeto ganhar réplicas depois sem mexer no código.
+
 ## Cache (Redis)
 
 O cache é **um Redis só deste projeto** (`app-<id>-cache`), ao lado do
@@ -282,9 +319,10 @@ O contêiner é o mesmo; o que muda é quem está do outro lado. Detalhes em
   precisar montar link absoluto, leia do `Host` da requisição.
 - **E-mail, SMS, pagamento.** São serviços de fora, com chave pedida por
   `request_variable`.
-- **Mais de uma instância.** Um contêiner por ambiente. Estado em memória
-  (sessão, cache, contador) sobrevive só até o próximo reinício — e reinício
-  acontece.
+- **Estado em memória** (sessão, cache, contador) sobrevive só até o próximo
+  reinício — e reinício acontece. Com réplicas, nem isso: cada réplica tem a
+  própria memória (ver "Com mais de uma réplica"). O que precisa sobreviver vai
+  no Redis.
 
 ## Quando "funciona local e quebra publicado"
 

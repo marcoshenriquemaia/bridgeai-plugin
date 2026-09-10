@@ -41,6 +41,33 @@ banco, o mesmo cache e o mesmo armazenamento**; o que os separa é o comando.
   pesado o bastante para engasgar a API, ou quando ele precisa continuar rodando
   enquanto o site atende. Cote com `estimate_cost` e diga o número antes.
 
+**O web pode ter RÉPLICAS**: cópias iguais do mesmo contêiner, atendendo o mesmo
+endereço, com a plataforma repartindo as requisições entre elas e tirando do
+rodízio a que parar de responder. É `provision_resource` com
+`resource_kind: 'server'` e `replicas` (o número final, até 4; sem
+`resource_size` e sem `resource_name`); `reduce_resource` com `replicas: 1`
+volta a um contêiner só.
+
+- **Nunca proponha réplica por padrão.** Um site com uma réplica pisca alguns
+  segundos ao publicar, e isso é aceitável para quase todo mundo. Réplica é
+  para quem já está no ar com gente usando e não quer que publicar derrube o
+  site, ou para quem precisa que uma queda de contêiner não tire o site do ar.
+- O que o usuário ganha, dito nas palavras dele: **atualizar sem sair do ar** —
+  a publicação troca uma réplica por vez e confere cada uma antes da seguinte.
+  Não use o nome técnico da peça que reparte as visitas — a pessoa não sabe o
+  que é; diga o que ela ganha.
+- Cada réplica custa como **um servidor do mesmo tamanho**, por ambiente
+  servido: três réplicas de 512 MB pagam três servidores de 512 MB. Cote com
+  `estimate_cost` e `replicas` antes de propor.
+- Exige caminho de saúde (`set_health_path`): é por ele que a plataforma confere
+  cada réplica. A PRIMEIRA réplica reinicia o site uma vez; da segunda em
+  diante, nada pisca. Diga isso antes de mandar o link.
+- Só o web tem réplica. Processo extra não — duas cópias de um cron rodariam a
+  mesma tarefa duas vezes.
+- Com réplicas, o app precisa guardar sessão no Redis e nada em disco local
+  (a skill `dentro-do-conteiner` diz como); `logs` com `replica` lê uma delas, e
+  `status` mostra em qual versão cada uma está.
+
 **E mais de um ARMAZENAMENTO**, quando o projeto precisa separar arquivos que
 não se misturam. O app escolhe qual usar pedindo a URL com o nome do bucket. Na
 dúvida, um só.
@@ -235,12 +262,13 @@ segunda chamada. Para mudar qualquer coisa, peça um link novo.
 **`provision_resource` adiciona ou aumenta UM item de um app já criado**
 (servidor maior, cache, armazenamento, cota de disco e **ambiente**);
 **`reduce_resource` deixa um item MENOR** (servidor de 2048 para 1024 MB, cota
-de disco de 5 para 2 GB); **`remove_resource` tira um** (cache ou armazenamento
-— tirar o servidor é `remove_app`, e ambiente não sai por aqui). As três
-EXECUTAM só: quem propõe é `gerar_link_aprovacao`, com `resource_kind` e o
-`resource_size` — ou `environment`, quando o item é um ambiente, ou
-`resource_name` (mais `resource_command`, ao criar) quando é um PROCESSO ou um
-armazenamento a mais. Um processo extra **sai** por `remove_resource`: ao
+de disco de 5 para 2 GB, réplicas de 3 para 1); **`remove_resource` tira um**
+(cache ou armazenamento — tirar o servidor é `remove_app`, e ambiente não sai
+por aqui). As três EXECUTAM só: quem propõe é `gerar_link_aprovacao`, com
+`resource_kind` e o `resource_size` — ou `environment`, quando o item é um
+ambiente, ou `resource_name` (mais `resource_command`, ao criar) quando é um
+PROCESSO ou um armazenamento a mais, ou `replicas` (sem tamanho e sem nome)
+quando é o NÚMERO de réplicas do web. Um processo extra **sai** por `remove_resource`: ao
 contrário do servidor principal, tirá-lo não despublica nada — o site continua
 no ar. **Elas podem
 reiniciar o app** — cache e armazenamento entram no ambiente do contêiner, e
