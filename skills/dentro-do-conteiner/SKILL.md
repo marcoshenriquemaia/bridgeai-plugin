@@ -1,6 +1,6 @@
 ---
 name: dentro-do-conteiner
-description: O que o servidor de um app na BridgeAI recebe, exige e proíbe — porta, variáveis, disco somente leitura, o que o cache deixa fazer, como subir e ler arquivo do armazenamento, como rodar migration em produção e como escrever um processo separado (worker, cron). Use ANTES de escrever ou mudar o Dockerfile, uma rota de upload ou download, uma fila, um cron, uma migration, ou quando o app funciona na máquina do usuário e quebra publicado.
+description: O que o servidor de um app na BridgeAI recebe, exige e proíbe — porta, variáveis, disco somente leitura, o que o cache deixa fazer, como subir e ler arquivo do armazenamento, como rodar migration em produção, como empacotar um Next.js (standalone, ISR e o cache read-only) e como escrever um processo separado (worker, cron). Use ANTES de escrever ou mudar o Dockerfile, um projeto Next.js, uma rota de upload ou download, uma fila, um cron, uma migration, ou quando o app funciona na máquina do usuário e quebra publicado.
 ---
 
 # Dentro do contêiner
@@ -84,6 +84,83 @@ CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
   muda). A publicação espera esse 200 por até ~80 segundos e depois desiste com
   `healthy: false` — um app que demora mais que isso para subir precisa de um
   caminho de saúde que responda antes de terminar de carregar tudo.
+
+## Next.js
+
+O Next roda aqui como qualquer app Node — é o framework mais comum deste
+público. Duas coisas o quebram, ou sujam o log de um jeito que não aponta a
+causa. As duas foram medidas no contêiner de verdade, com as coleiras acima.
+
+**1. `experimental: { isrFlushToDisk: false }` no `next.config`.** O disco é
+somente leitura, e o Next tenta gravar o cache de páginas revalidadas em
+`.next/server/...`. Sem essa linha, o log enche de `EROFS: read-only file
+system` — o app **funciona e serve**, mas o log passa a mentir sobre a saúde
+dele, e é o log que você lê quando algo dá errado. A revalidação continua, na
+memória.
+
+```js
+// next.config.mjs
+export default {
+  experimental: { isrFlushToDisk: false },
+};
+```
+
+**2. Migration de ORM (Prisma, Drizzle) NÃO combina com `output: 'standalone'`.**
+O standalone poda o `node_modules` para só o que a app importa, e o CLI que roda
+a migration some junto (o `prisma` puxa dependências como `effect` que a poda
+leva). O sintoma é `Cannot find module` no arranque, num contêiner que subia
+local. Escolha pelo que o app faz:
+
+- **Roda migration de ORM no arranque** (o caso comum, com Prisma): **não** ponha
+  `output: 'standalone'`. Use `next start` com o `node_modules` de produção
+  inteiro, e ponha o `prisma` em `dependencies` (não `devDependencies` — senão o
+  `npm prune` o remove e a migration não roda). Imagem de ~300 MB, medida.
+
+  ```dockerfile
+  FROM node:22-alpine AS builder
+  WORKDIR /app
+  COPY package*.json ./
+  RUN npm ci
+  COPY . .
+  RUN npm run build            # o build é "prisma generate && next build"
+  RUN npm prune --omit=dev     # sobra o runtime + o CLI do Prisma
+
+  FROM node:22-alpine
+  WORKDIR /app
+  ENV NODE_ENV=production
+  COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+  COPY --from=builder --chown=node:node /app/.next ./.next
+  COPY --from=builder --chown=node:node /app/public ./public
+  COPY --from=builder --chown=node:node /app/package.json ./package.json
+  COPY --from=builder --chown=node:node /app/next.config.mjs ./next.config.mjs
+  COPY --from=builder --chown=node:node /app/prisma ./prisma
+  USER node
+  # A migration roda ANTES de o servidor escutar; o next start lê PORT.
+  CMD ["sh", "-c", "npx prisma migrate deploy && npx next start"]
+  ```
+
+- **Não roda migration de ORM** (site, SSR sem migrate, schema por SQL puro):
+  `output: 'standalone'` deixa a imagem bem menor (~70–180 MB). O `server.js` do
+  standalone **não** inclui os assets estáticos nem `public` — copie os dois à
+  mão, e ponha `ENV HOSTNAME=0.0.0.0` para o servidor ligar em todas as
+  interfaces (senão um `HEALTHCHECK` interno em `127.0.0.1` falha).
+
+  ```dockerfile
+  # no estágio de runtime, com output: 'standalone' no next.config
+  ENV HOSTNAME=0.0.0.0
+  COPY --from=builder --chown=node:node /app/public ./public
+  COPY --from=builder --chown=node:node /app/.next/standalone ./
+  COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+  USER node
+  CMD ["node", "server.js"]
+  ```
+
+O resto do contrato vale igual: escute em `PORT` (o `next start` e o `server.js`
+do standalone leem essa variável); `next/image` grava o cache otimizado no
+`/app/.next/cache`, que a plataforma já provisiona como disco temporário de
+128 MB; e `NEXT_PUBLIC_*` chega ao navegador em tempo de execução — medido. A
+migration em si segue a regra da seção abaixo, e com Prisma o `shadowDatabaseUrl`
+já vem no `.env`.
 
 ## Migration em produção
 
