@@ -218,7 +218,7 @@ Claude Code, por `/mcp` — um comando que só o usuário digita. Não há outro
 caminho, nenhum passa por colar token no chat, e nenhum passa por variável de
 ambiente.
 
-Estas vinte e seis existem hoje. **Chame só o que está nesta tabela** — se você tiver
+Estas vinte e sete existem hoje. **Chame só o que está nesta tabela** — se você tiver
 dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arquivo.
 
 | Para | Use |
@@ -229,6 +229,7 @@ dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arqui
 | Antes de gastar | `estimate_cost`, `current_cost` |
 | Investigar | `query` (só leitura), `logs` (com `since_minutes` para uma janela de tempo, `contains` para procurar um texto, e `process` para o log de um worker) |
 | Configurar | `dev_credentials`, `request_variable`, `list_variables`, `set_health_path` |
+| Começar de um plano | `project_plan` — quando ele colar um id `P-XXXXXX`, busque ANTES de escrever código: os itens, as cores e o recorte já estão escolhidos |
 | Criar projeto | `create_app` |
 | Mudar os itens | `provision_resource` (adiciona ou aumenta, inclusive AMBIENTE e PROCESSO), `reduce_resource` (deixa menor), `remove_resource` (tira) |
 | Consertar o que está no ar | `restart_app` (app travado), `rollback_deploy` (publicação quebrada) |
