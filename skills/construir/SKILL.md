@@ -28,6 +28,7 @@ expira.
 
 | | |
 |---|---|
+| **O que ele confirmou** | A resposta traz a fala de fechamento: o projeto descrito nas palavras dele, por que o recorte é esse, e por que cada peça cobrada existe. **É a parte mais útil do plano** — as listas dizem o QUE, e ela diz o PORQUÊ. Ele já leu e concordou com ela na tela |
 | **O recorte** | O que fica de pé primeiro e o que fica para depois. Construa **só a primeira lista**. Ela foi escolhida para caber em duas semanas, e juntar tudo é como um projeto vira oito meses e nenhum site no ar |
 | **As cores** | Vêm em hexadecimal, na ordem fundo, tinta, destaque, apoio, extra. Use **desde a primeira tela**. Começar no cinza padrão do framework joga fora a metade mais cara da conversa |
 | **O formato** | Botão e campo: arredondado, reto, pílula ou contorno. Uma decisão de CSS, e ele já a tomou |
@@ -43,6 +44,10 @@ tabelas, rotas e arquivos.
 **1. Buscar o plano.** Leia em voz alta o que ele vai ganhar primeiro e quanto
 vai custar por mês. ⚠️ O número da resposta é o do catálogo de **hoje**, e não o
 do dia em que ele fechou a conversa — diga o de hoje.
+
+⚠️ **E não repita a fala de fechamento de volta para ele.** Ele acabou de ouvir
+aquilo, palavra por palavra, e concordou — repetir diz que você não leu. Ela
+está ali para VOCÊ saber por que o projeto é assim.
 
 **2. Criar o projeto**, se a resposta disser que ele ainda não existe.
 `create_app` com os argumentos que vieram prontos. São duas chamadas: a primeira
