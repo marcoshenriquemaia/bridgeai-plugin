@@ -35,15 +35,19 @@ Pergunte em **duas rodadas**, não em vinte perguntas de uma vez.
    descreve?** Essa frase costuma virar o título da capa, quase sem edição.
 3. **Que telas o cliente espera ver nesta primeira versão?** Duas ou três.
    Não faça sete.
+4. **Isso abre no navegador ou é um aplicativo de celular?** No Brasil
+   "aplicativo" quase sempre quer dizer instalado no telefone, e a resposta
+   muda a moldura da apresentação e a largura para a qual você escreve. Se for
+   app, publique com `device: "mobile"`.
 
 ### Rodada 2 — como tem que parecer
 
-4. **Me mande um site que você acha a cara desse projeto, e diga o que você
+5. **Me mande um site que você acha a cara desse projeto, e diga o que você
    gosta nele.** É a pergunta que mais evita mockup genérico. Se ele não tiver
    referência, pergunte o contrário: um que ele acha que NÃO combina, e por quê.
-5. **Três palavras para a sensação.** "Calmo, artesanal, caro" leva a um lugar
+6. **Três palavras para a sensação.** "Calmo, artesanal, caro" leva a um lugar
    muito diferente de "rápido, direto, barato".
-6. **O que não pode faltar na primeira tela?** Preço? WhatsApp? Uma foto?
+7. **O que não pode faltar na primeira tela?** Preço? WhatsApp? Uma foto?
 
 Se o usuário responder pouco ou disser "faz do seu jeito", **escolha e diga o
 que escolheu em uma frase**, sem devolver a pergunta. Ele vai corrigir olhando.
@@ -77,8 +81,14 @@ SVG por dentro, bloco de cor ou gradiente. Teto de 4 MB.
   gradiente atrás de texto, cantinho arredondado com barrinha colorida na
   esquerda. Se a página pudesse ser de qualquer negócio, ela ainda não está
   pronta.
-- **Faça responsivo.** A página é mostrada numa moldura de celular também, e é
-  no celular que o cliente vai abrir o link do WhatsApp.
+- **Escreva para a moldura que você pediu.** No padrão (`both`) a página
+  aparece numa janela de computador e o cliente troca para o celular num
+  clique: faça responsivo — é no celular que ele vai abrir o link do WhatsApp.
+  Com `device: "mobile"` ela abre num APARELHO, numa tela de ~386px e sem botão
+  de computador: escreva uma coluna, alvos de toque grandes, nada de barra
+  lateral. Publicar um app na moldura de navegador — com os três pontinhos e "a
+  sua página" escrito em cima — é a primeira coisa que o cliente vê, e ali ela
+  está errada.
 
 ### Duas marcações que a plataforma usa
 
