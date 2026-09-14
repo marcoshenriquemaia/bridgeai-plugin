@@ -34,6 +34,11 @@ expira.
 | **O formato** | Botão e campo: arredondado, reto, pílula ou contorno. Uma decisão de CSS, e ele já a tomou |
 | **A stack** | O que o Arquiteto escolheu sabendo o que a plataforma roda. Se você discordar, **diga o motivo antes de trocar** — não troque calado |
 | **Os itens** | Servidor, banco, cache e armazenamento, já normalizados pelo catálogo. São os argumentos do `create_app`, prontos na resposta |
+| **As letras** | O par de fontes que ele escolheu vendo. Carregue essas — e ⚠️ **não caia em Inter, Roboto ou na fonte do sistema**: elas são o marcador número um de tela gerada por IA, e ele escolheu outra coisa de propósito |
+| **O que o projeto guarda** | O esboço das entidades, nas palavras dele. É o vocabulário do projeto — use esses nomes, e confirme com ele antes da primeira migration |
+| **O que precisa estar seguro** | Sai dos riscos que ESTE projeto tem, e não é conselho genérico. É requisito, e entra na primeira lista |
+| **O que precisa de teste** | A lista de testes que este projeto precisa ter. Escreva-os enquanto constrói, e não "depois" |
+| **Os especialistas** | Os agentes a criar. Ver a seção abaixo |
 
 O que o plano **não** decidiu, e você combina com ele: o **id do projeto** (curto,
 minúsculas e hífen — vira o endereço `<id>.bridgeaibrasil.com.br`) e o nome das
@@ -65,11 +70,43 @@ máquina.
 
 **4. Subir o ambiente de desenvolvimento** — a seção abaixo.
 
-**5. Construir a primeira lista**, e só ela.
+**5. Criar os especialistas** que o plano indicou — a seção abaixo. Antes de
+construir, porque é para eles que você vai delegar enquanto constrói.
 
-**6. Publicar** quando a primeira lista estiver de pé: `/bridgeai:publicar`. Não
+**6. Construir a primeira lista**, e só ela. A segurança e os testes do plano
+**fazem parte dela** — não são uma fase depois. Uma consulta sem filtro de dono
+escrita hoje é a que ninguém acha em dezembro.
+
+**7. Publicar** quando a primeira lista estiver de pé: `/bridgeai:publicar`. Não
 deixe para o fim de tudo — um site no ar cedo é o que faz ele acreditar que o
 projeto existe.
+
+## Os especialistas do projeto
+
+O plano indica quais agentes este projeto ganha — no máximo quatro, escolhidos
+pelo que ele É. Para cada um:
+
+```
+get_agent(agent_id: "revisor-de-seguranca")
+```
+
+Grave o conteúdo **exatamente como volta**, no caminho que a resposta diz
+(`.claude/agents/<id>.md`). Eles são escritos em português e conhecem esta
+plataforma — o de segurança sabe o que a BridgeAI já resolve e não manda
+configurar HTTPS; o de interface sabe que as cores já foram escolhidas.
+
+Depois disso, **delegue**: chame cada um pelo nome quando a tarefa for a dele.
+
+⚠️ **Três coisas que já custaram trabalho perdido:**
+
+- **O subagente não enxerga esta conversa.** Mande no pedido o que ele precisa
+  saber — o arquivo, a decisão já tomada, o que não é para mexer. Um pedido de
+  uma linha volta com trabalho genérico.
+- **Não crie agente que o plano não indicou.** Cada um custa contexto em toda
+  sessão de quem trabalhar neste projeto, e agente demais faz a delegação errar
+  o alvo.
+- **Diga a ele o que você criou e para quê.** Quatro arquivos novos antes de a
+  primeira tela existir parece enrolação para quem não sabe o que são.
 
 ## O ambiente de desenvolvimento
 

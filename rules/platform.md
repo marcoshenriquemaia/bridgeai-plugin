@@ -226,7 +226,7 @@ Claude Code, por `/mcp` — um comando que só o usuário digita. Não há outro
 caminho, nenhum passa por colar token no chat, e nenhum passa por variável de
 ambiente.
 
-Estas vinte e sete existem hoje. **Chame só o que está nesta tabela** — se você tiver
+Estas vinte e oito existem hoje. **Chame só o que está nesta tabela** — se você tiver
 dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arquivo.
 
 | Para | Use |
@@ -238,6 +238,7 @@ dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arqui
 | Investigar | `query` (só leitura), `logs` (com `since_minutes` para uma janela de tempo, `contains` para procurar um texto, e `process` para o log de um worker) |
 | Configurar | `dev_credentials`, `request_variable`, `list_variables`, `set_health_path` |
 | Começar de um plano | `project_plan` — quando ele colar um id `P-XXXXXX`, busque ANTES de escrever código: os itens, as cores e o recorte já estão escolhidos |
+| Buscar um especialista | `get_agent` — traz um agente pronto para gravar em `.claude/agents/`. Quais criar sai do plano; sem plano, escolha pelo que o projeto é |
 | Criar projeto | `create_app` |
 | Mudar os itens | `provision_resource` (adiciona ou aumenta, inclusive AMBIENTE e PROCESSO), `reduce_resource` (deixa menor), `remove_resource` (tira) |
 | Consertar o que está no ar | `restart_app` (app travado), `rollback_deploy` (publicação quebrada) |
@@ -250,6 +251,37 @@ dúvida, a lista que o seu cliente MCP carregou é a autoridade, não este arqui
 aceita nulo, chave primária e estrangeira é `describe_schema` — chame antes de
 escrever a primeira linha de SQL ou de migration, porque chutar `created_at`
 onde a coluna é `criado_em` é o erro mais comum de quem não olhou.
+
+## Delegue o que tem vários trabalhos dentro
+
+Revisar segurança, desenhar interface, escrever teste e modelar banco são
+**quatro ofícios**. Feitos na mesma conversa eles competem: quando você chega no
+quarto, o contexto já está cheio do primeiro — e o que perde é sempre o teste.
+
+A BridgeAI entrega os especialistas prontos, em português, e eles conhecem esta
+plataforma. `get_agent` traz o conteúdo; você grava no caminho que ele responde:
+
+| Agente | Quando |
+|---|---|
+| `revisor-de-seguranca` | o projeto guarda dado de outra pessoa — login, cadastro, foto, pedido |
+| `escritor-de-testes` | há dinheiro, permissão ou operação sem volta |
+| `designer-de-interface` | o projeto tem tela |
+| `arquiteto-de-backend` | há regra de negócio de verdade: cobrança, agenda com conflito, estoque |
+| `modelador-de-dados` | mais de três ou quatro tipos de informação guardada, ou busca e relatório |
+
+**Se ele veio de um plano (`project_plan`), os agentes já estão escolhidos lá** —
+crie aqueles, e não outros.
+
+Três regras ao delegar, e as três já custaram trabalho perdido:
+
+- ⚠️ **No máximo quatro.** Cada agente instalado custa contexto em TODA sessão
+  de quem trabalha no projeto, e agente demais faz a delegação errar o alvo.
+  Mais não é melhor: é pior.
+- ⚠️ **O subagente não enxerga esta conversa.** Mande no pedido tudo o que ele
+  precisa saber — o arquivo, a decisão já tomada, o que não é para mexer. Um
+  pedido de uma linha volta com trabalho genérico.
+- **Diga ao usuário o que você criou e para quê.** Quatro arquivos novos antes
+  de a primeira tela existir parece enrolação para quem não sabe o que são.
 
 **O que roda dentro do servidor tem regras que não aparecem na sua máquina** —
 porta, disco somente leitura, o que o cache deixa fazer, como subir arquivo.
