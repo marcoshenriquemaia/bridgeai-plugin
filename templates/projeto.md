@@ -60,7 +60,8 @@ causa:
   grava em `./uploads` funciona aqui e quebra lá. Arquivo de usuário vai para o
   armazenamento, por URL assinada.
 - **Migration roda no `CMD`**, no arranque do contêiner — não há passo manual em
-  produção, e não há backup.
+  produção, e o backup da plataforma não serve de desfazer: trate migration
+  destrutiva como irreversível.
 - Há um caminho de saúde que precisa responder 200 (`status` mostra qual).
 
 Com o plugin instalado, a skill `dentro-do-conteiner` tem o contrato inteiro.

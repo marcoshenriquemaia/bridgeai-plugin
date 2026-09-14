@@ -164,10 +164,15 @@ já vem no `.env`.
 
 ## Migration em produção
 
-**Não há ferramenta de migration, e não há backup.** O caminho é o app rodar a
-migration **no arranque**, antes de escutar a porta — o `migrate deploy` do
-Prisma, o `migrate` do Drizzle, o `knex migrate:latest`, ou o equivalente —
-dentro do `CMD` acima. Regras:
+**Não há ferramenta de migration, e o backup que existe não é desfazer** — há um
+snapshot do banco por dia, guardado por 7 dias, restaurado à mão pela plataforma
+em cerca de 8 minutos, e que volta ao estado da **madrugada**: um erro do meio
+da tarde leva junto o trabalho do dia. Trate toda migration destrutiva como
+irreversível, porque na prática ela é.
+
+O caminho é o app rodar a migration **no arranque**, antes de escutar a porta —
+o `migrate deploy` do Prisma, o `migrate` do Drizzle, o `knex migrate:latest`,
+ou o equivalente — dentro do `CMD` acima. Regras:
 
 1. **Teste a migration no ambiente local primeiro**, pelo túnel, contra o banco
    local. É para isso que ele existe.
@@ -240,6 +245,24 @@ Como escrever o app para isso:
 - **Migration continua sendo do web** (ver "Migration em produção"). Rodá-la
   também no worker faz os dois competirem pelo lock do banco no arranque.
 
+### Onde vai a fila
+
+**Fila que não pode perder trabalho vai em TABELA no Postgres**, com
+`SELECT … FOR UPDATE SKIP LOCKED` — é assim que um worker pega um item sem
+disputar com outro. O Redis serve a fila descartável: o que dá para
+reprocessar, o que é idempotente, o que não faz falta se sumir.
+
+Não é sobre o Redis perder dado sozinho — ele grava AOF e sobrevive a reinício
+(ver "Cache (Redis)"). É o que duas operações de conta fazem com ele: **mudar o
+projeto de máquina** (`move_app`) cria um Redis vazio do outro lado e apaga o
+volume da origem, sem levar a fila junto; **tirar o item de cache**
+(`remove_resource`) para o Redis e o app deixa de receber `REDIS_URL` — o volume
+fica guardado até a purga do app, mas o worker não alcança mais nada.
+
+Nas duas não há erro nenhum: o worker sobe, acha a fila vazia e fica esperando
+trabalho que não existe mais — e um worker parado parece igual a um worker sem
+serviço. O que estava em tabela continua lá depois das duas.
+
 ## Com mais de uma réplica
 
 O web pode ter até 4 réplicas: contêineres **iguais**, com a mesma imagem e o
@@ -297,9 +320,9 @@ Consequências:
 - **Cache e FILA têm durabilidades diferentes, e o Redis é o mesmo.** O que
   está nele sobrevive a um reinício (AOF, gravado a cada segundo). **Não**
   sobrevive a mudar o projeto de máquina — o cache nasce vazio do outro lado —,
-  nem a `remove_app` seguido de purga. Se o projeto usa o Redis como fila
-  (BullMQ, jobs), dimensione o `cache_mb` pelo pior dia da fila, e não pelo de
-  hoje: fila não tem TTL, e cheia ela para de aceitar job.
+  nem a `remove_app` seguido de purga. Antes de pôr fila aqui, veja "Onde vai a
+  fila". Sendo ela descartável, dimensione o `cache_mb` pelo pior dia dela, e
+  não pelo de hoje: fila não tem TTL, e cheia ela para de aceitar job.
 - **Mudar o tamanho do cache reinicia o Redis do projeto** por uns segundos,
   sem perder o que estava nele. Pedir `dev_credentials` também (é como o
   usuário de desenvolvimento entra). O app publicado reconecta sozinho —
@@ -386,9 +409,13 @@ O contêiner é o mesmo; o que muda é quem está do outro lado. Detalhes em
 
 ## O que não existe, e como o app contorna
 
-- **Tarefa agendada / cron / worker separado.** Rode dentro do processo
-  (`setInterval`, `node-cron`), aceitando que reinicia junto com o app. Para
-  fila, BullMQ no mesmo processo.
+- **Tarefa agendada disparada pela plataforma.** Não há: quem agenda é o
+  código do app. Rode dentro do web (`setInterval`, `node-cron`), aceitando que
+  reinicia junto com ele, ou num **processo extra** (worker), que o projeto pode
+  contratar — ver "Mais de um processo". Fila descartável é BullMQ no Redis do
+  projeto, consumida pelo web ou pelo worker; a que não pode perder trabalho vai
+  em tabela — ver "Onde vai a fila". Com réplicas, cron no web roda em cada uma
+  (ver "Com mais de uma réplica").
 - **Endereço.** O da plataforma é `<app>.bridgeaibrasil.com.br`, e ele sempre
   responde. O usuário pode acrescentar um domínio dele no painel — o app não
   muda em nada por causa disso: quem roteia é a borda, e o contêiner continua
