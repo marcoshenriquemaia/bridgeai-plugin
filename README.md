@@ -25,9 +25,37 @@ plataforma. Instale os dois.
 
 ---
 
-## Instalar
+## ⚠️ Você provavelmente não precisa deste plugin
 
-Dentro do Claude Code:
+Desde 15/09/2026 a BridgeAI inteira — as ferramentas, as regras e os guias — vem
+do **servidor MCP**. Um comando conecta, e não há nada para reiniciar:
+
+```
+claude mcp add --transport http bridgeai https://mcp.bridgeaibrasil.com.br/mcp
+```
+
+Depois `/mcp` no chat → escolha **bridgeai** → autentique. É OAuth: o navegador
+abre uma vez e o acesso fica guardado no cliente.
+
+O passo a passo está em
+**[bridgeaibrasil.com.br/comecar](https://bridgeaibrasil.com.br/comecar)**.
+
+### E as ferramentas que rodam na sua máquina
+
+O túnel — que liga o seu `npm run dev` ao banco na nuvem, sem Docker — é um
+comando, e também não se instala:
+
+```
+npx bridgeai tunnel --dev
+```
+
+---
+
+## Instalar o plugin mesmo assim
+
+Ele continua funcionando e continua publicado. O que ele acrescenta hoje são
+atalhos (`/bridgeai:publicar`, `/bridgeai:custo`) e dois hooks. **Nada do que a
+plataforma faz depende dele.**
 
 ```
 /plugin marketplace add marcoshenriquemaia/bridgeai-plugin
@@ -35,16 +63,6 @@ Dentro do Claude Code:
 ```
 
 Se aparecer `Run /reload-plugins to activate`, digite `/reload-plugins`.
-
-### Entrar
-
-```
-/bridgeai:entrar
-```
-
-Aparece um código de 8 letras, o navegador abre no GitHub, você confirma. O acesso
-fica guardado na sua máquina e **não aparece na tela**. Depois, **feche e abra o
-Claude Code** — é assim que ele passa a enxergar seus projetos.
 
 ### Criar o primeiro projeto
 
