@@ -1,11 +1,11 @@
 ---
 name: construir
-description: Construir um projeto a partir de um plano do Arquiteto da BridgeAI — o id colado tem o formato P-XXXXXX. Use quando o usuário colar um plano, ou disser "vou construir o projeto X na BridgeAI". Ela diz como buscar o plano, o que fazer com o recorte, as cores e os itens já escolhidos, em que ordem criar o projeto e subir o ambiente de desenvolvimento, e o que NÃO perguntar de novo.
+description: Construir um projeto a partir de um plano da IA Arquiteta da BridgeAI — o id colado tem o formato P-XXXXXX. Use quando o usuário colar um plano, ou disser "vou construir o projeto X na BridgeAI". Ela diz como buscar o plano, o que fazer com o recorte, as cores e os itens já escolhidos, em que ordem criar o projeto e subir o ambiente de desenvolvimento, e o que NÃO perguntar de novo.
 ---
 
 # Construir a partir de um plano
 
-O usuário conversou com o Arquiteto da BridgeAI antes de falar com você. Ele
+O usuário conversou com a IA Arquiteta da BridgeAI antes de falar com você. Ele
 descreveu a ideia, respondeu perguntas sobre o que o projeto precisa fazer, e
 escolheu cores e formato de botão **vendo exemplos na tela** — que é a única
 forma que funciona com quem não é designer.
@@ -32,7 +32,7 @@ expira.
 | **O recorte** | O que fica de pé primeiro e o que fica para depois. Construa **só a primeira lista**. Ela foi escolhida para caber em duas semanas, e juntar tudo é como um projeto vira oito meses e nenhum site no ar |
 | **As cores** | Vêm em hexadecimal, na ordem fundo, tinta, destaque, apoio, extra. Use **desde a primeira tela**. Começar no cinza padrão do framework joga fora a metade mais cara da conversa |
 | **O formato** | Botão e campo: arredondado, reto, pílula ou contorno. Uma decisão de CSS, e ele já a tomou |
-| **A stack** | O que o Arquiteto escolheu sabendo o que a plataforma roda. Se você discordar, **diga o motivo antes de trocar** — não troque calado |
+| **A stack** | O que a IA Arquiteta escolheu sabendo o que a plataforma roda. Se você discordar, **diga o motivo antes de trocar** — não troque calado |
 | **Os itens** | Servidor, banco, cache e armazenamento, já normalizados pelo catálogo. São os argumentos do `create_app`, prontos na resposta |
 | **As letras** | O par de fontes que ele escolheu vendo. Carregue essas — e ⚠️ **não caia em Inter, Roboto ou na fonte do sistema**: elas são o marcador número um de tela gerada por IA, e ele escolheu outra coisa de propósito |
 | **O que o projeto guarda** | O esboço das entidades, nas palavras dele. É o vocabulário do projeto — use esses nomes, e confirme com ele antes da primeira migration |
@@ -167,7 +167,7 @@ Três regras, e as três já custaram tempo de alguém:
 
 ## Como falar com ele
 
-Ele não é técnico — foi por isso que o Arquiteto existiu. Diga o que você está
+Ele não é técnico — foi por isso que a IA Arquiteta existiu. Diga o que você está
 fazendo em resultado, e não em tecnologia: "estou montando a tela que lista as
 peças" e não "criei o componente de listagem com SSR".
 
