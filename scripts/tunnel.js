@@ -170,13 +170,13 @@ if (!token) {
   morre(
     'Faltou o acesso da BridgeAI para abrir o túnel.\n' +
       '\n' +
-      'Rode:  node "' +
-      (process.env.CLAUDE_PLUGIN_ROOT || '<plugin>') +
-      '/scripts/login.js"\n' +
+      'Peça ao seu agente as CREDENCIAIS DE DESENVOLVIMENTO deste projeto.\n' +
+      'Ele escreve o .env com tudo o que o túnel precisa, e não há chave\n' +
+      'nenhuma para você copiar.\n' +
       '\n' +
-      'Depois feche e abra o terminal, para a variável entrar no ambiente.\n' +
-      'Se você entrou pelo /mcp, isto é esperado: aquele login vale para as\n' +
-      'ferramentas, e o túnel é um programa à parte que ainda lê o ambiente.',
+      'Rode o túnel de dentro da pasta do projeto — é de lá que ele lê o .env.\n' +
+      '\n' +
+      'Sem agente à mão:  npx bridgeai login',
   );
 }
 

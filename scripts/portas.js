@@ -385,6 +385,10 @@ module.exports = {
   nomeDoProcesso,
   reconciliar,
   resumo,
+  // Exportado para o `bin/bridgeai.js` poder chamá-lo: daquele arquivo, quem é
+  // o módulo principal é ele, então a guarda `require.main === module` logo
+  // abaixo não dispara e o `require` sozinho não rodaria nada.
+  cli,
 };
 
 if (require.main === module) {

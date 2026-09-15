@@ -1,0 +1,39 @@
+{
+  "name": "bridgeai",
+  "version": "0.1.0",
+  "description": "As ferramentas locais da BridgeAI: o túnel que liga a sua máquina ao banco na nuvem, o registro de portas e o abridor de páginas. Sem dependência nenhuma.",
+  "bin": {
+    "bridgeai": "bin/bridgeai.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin/",
+    "scripts/tunnel.js",
+    "scripts/portas.js",
+    "scripts/abrir.js",
+    "scripts/login.js",
+    "README.md"
+  ],
+  "keywords": [
+    "bridgeai",
+    "tunnel",
+    "postgres",
+    "mcp",
+    "infraestrutura"
+  ],
+  "author": {
+    "name": "Marcos Maia",
+    "url": "https://github.com/marcoshenriquemaia"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcoshenriquemaia/bridgeai-plugin.git"
+  },
+  "homepage": "https://bridgeaibrasil.com.br",
+  "scripts": {
+    "test": "node --test scripts/*.test.js"
+  }
+}

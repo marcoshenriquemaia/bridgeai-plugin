@@ -1,0 +1,6 @@
+# O tarball que o `npm pack` gera ao conferir o pacote antes de publicar.
+*.tgz
+
+# Este pacote não tem dependência nenhuma — a pasta só aparece ao instalar o
+# tarball em algum lugar para prova.
+node_modules/

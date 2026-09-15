@@ -1,0 +1,26 @@
+# Fim de linha LF, sempre, em tudo o que é executado.
+#
+# ⚠️ O `bin/bridgeai.js` começa com `#!/usr/bin/env node`. Com CRLF, o Linux e o
+# macOS leem o interpretador como `node\r` e o comando morre em
+# `bad interpreter: node^M` — um erro que fala de um programa que não existe.
+#
+# Isto não é hipótese nem zelo: o `core.autocrlf` desta máquina é o padrão do
+# Git for Windows, e este projeto já apanhou dele uma vez — o `git archive`
+# mandou o `mcp/` para a VM com CRLF, e um CR no fim de linha de um `.sh`
+# executado lá vira "command not found" sem explicação.
+#
+# A diferença é que ali o estrago ficou na nossa VM. Aqui ele vai para o `npm
+# publish`, e quem apanha é todo usuário de Linux e de Mac — nenhum deles com
+# como saber por quê.
+#
+# O `npm pack` empacota o que está NO DISCO, então o `.gitattributes` é o que
+# garante que um checkout nesta máquina produza o arquivo certo.
+#
+# Só o que é EXECUTADO ou publicado entra aqui. Uma regra `*` genérica seria
+# mais completa e renormalizaria todo `.md` do repositório no próximo `git add`
+# de quem estiver trabalhando neles — um diff enorme, em arquivos que ninguém
+# executa, por um problema que eles não têm.
+
+*.js text eol=lf
+*.json text eol=lf
+bin/* text eol=lf
