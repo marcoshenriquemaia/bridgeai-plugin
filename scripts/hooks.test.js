@@ -163,7 +163,7 @@ function rodarLoadPlatform() {
 test('load-platform: NÃO carrega as regras — quem as manda é o servidor MCP', () => {
   // Esta é a asserção que impede o custo de dobrar. As regras chegam pelo
   // `instructions` do MCP em toda sessão; se este hook voltar a carregá-las,
-  // quem tem o plugin recebe ~23 mil tokens repetidos em toda conversa, sem
+  // quem tem o plugin recebe ~25 mil tokens repetidos em toda conversa, sem
   // uma linha de conteúdo nova e sem nada acusando.
   const saida = rodarLoadPlatform();
   assert.doesNotMatch(saida, /## O modelo/);

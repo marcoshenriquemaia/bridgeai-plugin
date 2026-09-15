@@ -1,7 +1,7 @@
 <!--
   Modelo do bloco que vai para o CLAUDE.md do PROJETO do usuário.
 
-  Ele é versionado no repositório dele, então alcança quem o hook deste plugin
+  Ele é versionado no repositório dele, então alcança quem o servidor MCP
   não alcança: um colaborador que clonou, outro agente, uma máquina sem o
   plugin instalado. Foi essa a lacuna que fez alguém desenvolvendo aqui não
   descobrir que existia como acrescentar um ambiente, e outro publicar um app
@@ -26,14 +26,16 @@ armazenamento dele, e o Claude enxerga tudo isso pelas ferramentas
 `current_cost`. **Consulte antes de supor**: o estado real está a uma chamada de
 distância.
 
-Se essas ferramentas não aparecerem nesta sessão, o plugin não está instalado ou
-ninguém entrou. Instalar e entrar:
+Se essas ferramentas não aparecerem nesta sessão, a BridgeAI não está ligada
+aqui. Ligar e entrar — um comando de terminal, e nenhum plugin:
 
 ```
-/plugin marketplace add marcoshenriquemaia/bridgeai-plugin
-/plugin install bridgeai@bridgeai
-/mcp          → escolha bridgeai → autenticar
+claude mcp add --transport http bridgeai https://mcp.bridgeaibrasil.com.br/mcp
 ```
+
+Depois `/mcp` no chat → escolha **bridgeai** → autenticar. No Codex é
+`codex mcp add bridgeai --url https://mcp.bridgeaibrasil.com.br/mcp` seguido de
+`codex mcp login bridgeai`.
 
 ### Rodar na máquina
 
@@ -41,12 +43,11 @@ O servidor roda aqui; banco, cache e armazenamento ficam na nuvem. **Ninguém
 instala Docker, Postgres nem Redis.** A ordem, e ela importa:
 
 1. `dev_credentials` grava o `.env` — ele já traz o acesso que o túnel usa.
-2. `node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --dev`, em segundo plano.
+2. `npx bridgeai tunnel --dev`, em segundo plano.
 3. `npm install && npm run dev`.
 
 O `.env` **não vai para o Git**. E antes de subir servidor ou túnel, veja o que a
-sessão anterior deixou aberto:
-`node "${CLAUDE_PLUGIN_ROOT}/scripts/portas.js"`.
+sessão anterior deixou aberto: `npx bridgeai portas`.
 
 ### O que o servidor recebe quando está publicado
 
@@ -64,7 +65,7 @@ causa:
   destrutiva como irreversível.
 - Há um caminho de saúde que precisa responder 200 (`status` mostra qual).
 
-Com o plugin instalado, a skill `dentro-do-conteiner` tem o contrato inteiro.
+O guia `dentro-do-conteiner` (`get_guide`) tem o contrato inteiro.
 
 ### O que NÃO se faz por aqui
 

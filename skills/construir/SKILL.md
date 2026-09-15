@@ -21,7 +21,8 @@ qualquer coisa.** Refazer a entrevista é o pior começo possível: ele acabou d
 responder, e repetir diz que a plataforma não guardou nada.
 
 Se as ferramentas `mcp__bridgeai__*` não aparecerem, o plugin não está instalado
-ou ninguém entrou. `/bridgeai:entrar` resolve, e o plano continua lá — ele não
+ou ninguém ligou a BridgeAI aqui. `claude mcp add --transport http bridgeai
+https://mcp.bridgeaibrasil.com.br/mcp` resolve, e o plano continua lá — ele não
 expira.
 
 ## O que o plano já decidiu, e você não reabre
@@ -63,7 +64,7 @@ Se a resposta disser que o plano **já virou um projeto**, não crie outro:
 `describe_app` e continue de onde parou.
 
 **3. Escrever o `CLAUDE.md` do projeto** com a seção da plataforma
-(`${CLAUDE_PLUGIN_ROOT}/templates/projeto.md`, trocando `<app>` pelo id).
+(`get_guide` com `claude-md-do-projeto`, trocando `<app>` pelo id).
 Acrescente no fim se o arquivo já existir; nunca sobrescreva. Isto alcança quem
 o plugin não alcança — um colaborador que clonou, outro agente, ele em outra
 máquina.
@@ -77,7 +78,8 @@ construir, porque é para eles que você vai delegar enquanto constrói.
 **fazem parte dela** — não são uma fase depois. Uma consulta sem filtro de dono
 escrita hoje é a que ninguém acha em dezembro.
 
-**7. Publicar** quando a primeira lista estiver de pé: `/bridgeai:publicar`. Não
+**7. Publicar** quando a primeira lista estiver de pé — o workflow vem de
+`get_guide` com `workflow-de-publicacao`. Não
 deixe para o fim de tudo — um site no ar cedo é o que faz ele acreditar que o
 projeto existe.
 
@@ -114,7 +116,7 @@ Depois disso, **delegue**: chame cada um pelo nome quando a tarefa for a dele.
 banco, cache e armazenamento ficam na nuvem, por um túnel. A ordem importa:
 
 1. `dev_credentials` — grava o `.env`, que já traz o acesso que o túnel usa.
-2. `node "${CLAUDE_PLUGIN_ROOT}/scripts/tunnel.js" --dev`, em segundo plano.
+2. `npx bridgeai tunnel --dev`, em segundo plano.
 3. `npm install && npm run dev`.
 
 ⚠️ **O `.env` vem ANTES do túnel**, e não é preferência: o token do túnel nasce
@@ -133,14 +135,14 @@ Servidor e túnel continuam rodando depois que a conversa acaba. **Antes de subi
 qualquer um dos dois:**
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/scripts/portas.js"
+npx bridgeai portas
 ```
 
 Ele mede as portas na hora e diz de qual projeto cada uma é. Anote o que **você**
 subir:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/scripts/portas.js" abrir --porta 3000 --o-que "servidor de desenvolvimento" --pid <pid>
+npx bridgeai portas abrir --porta 3000 --o-que "servidor de desenvolvimento" --pid <pid>
 ```
 
 Três regras, e as três já custaram tempo de alguém:

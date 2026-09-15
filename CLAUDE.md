@@ -28,7 +28,7 @@ O motivo é alcance: aqui elas só existiam para quem instalasse o plugin, num
 cliente só. Quem usa Codex ou Cursor não recebia regra nenhuma e passava a supor.
 
 **Não as traga de volta para este hook.** O servidor já as manda; duas cópias
-seriam ~23 mil tokens repetidos em toda conversa de quem tem o plugin, por zero
+seriam ~25 mil tokens repetidos em toda conversa de quem tem o plugin, por zero
 conteúdo novo. `scripts/hooks.test.js` afirma a ausência.
 
 Contexto continua sendo orçamento, e o critério de onde algo mora continua o

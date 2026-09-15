@@ -127,7 +127,7 @@ templates/publicar.yml       o workflow que publica o seu projeto
 
 ⚠️ **`rules/` não existe mais aqui.** As regras da plataforma moram no servidor
 MCP (`mcp/rules/`, servidas pelo `instructions`), e duplicá-las neste hook
-custaria ~23 mil tokens repetidos em toda conversa de quem tem o plugin.
+custaria ~25 mil tokens repetidos em toda conversa de quem tem o plugin.
 `scripts/hooks.test.js` afirma essa ausência.
 
 ## Licença

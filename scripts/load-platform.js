@@ -15,7 +15,7 @@
 // nada.
 //
 // ⚠️ **E por isso este arquivo não pode voltar a carregá-las**: o servidor já
-// as manda. Duas cópias seriam ~23 mil tokens repetidos em toda conversa de
+// as manda. Duas cópias seriam ~25 mil tokens repetidos em toda conversa de
 // quem tem o plugin — o dobro do custo por zero conteúdo novo. `hooks.test.js`
 // afirma essa ausência.
 //

@@ -331,7 +331,7 @@ Consequências:
   desenvolvimento (`t_<app>-dev`, faixa `t:<app>-dev:*`) DENTRO do mesmo Redis
   do projeto — separado de produção por chave, e não por instância. O
   `dev_credentials` escreve `REDIS_URL` apontando para `127.0.0.1:56379` e
-  grava `BRIDGEAI_APP`, que o `tunnel.js` lê para saber de qual projeto é o
+  grava `BRIDGEAI_APP`, que o túnel lê para saber de qual projeto é o
   Redis. Mesmo assim, faça o app **tolerar `REDIS_URL` ausente** (cache em
   memória ou desligado): é o que o mantém de pé quando o túnel cai no meio do
   trabalho.

@@ -1,6 +1,6 @@
 # Publica este projeto na BridgeAI.
 #
-# Quem escreve este arquivo é o `/bridgeai:publicar` — ele preenche o `BRIDGEAI_APP`
+# Quem escreve este arquivo é o seu agente, por `get_guide` — ele preenche o `BRIDGEAI_APP`
 # com o id do seu app e empurra. Se você chegou aqui à mão, troque o valor.
 #
 # ## Não há nenhum segredo para configurar. É a diferença deste arquivo.
