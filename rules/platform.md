@@ -531,6 +531,13 @@ valor" para cada um.
 `request_variable` de novo se o pedido mudou de descrição, e não para reabrir
 um que já foi preenchido.
 
+**E não mande ele procurar qual é.** Quando você concluir que um valor precisa
+ser trocado, chame `list_variables` com `focus` e os nomes: a resposta traz o
+endereço que abre o painel já rolado até aquela variável, **destacada**, com o
+campo de troca aberto. Com dois nomes ou mais o endereço aponta a lista inteira,
+destacada — e aí diga no chat quais são. Nunca monte esse endereço à mão: ele
+carrega o ambiente dentro, e o mesmo nome existe em produção e no local.
+
 ## Desenvolver na máquina dele
 
 O servidor roda na máquina da pessoa; banco, cache e armazenamento ficam na
