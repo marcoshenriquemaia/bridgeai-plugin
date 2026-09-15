@@ -93,20 +93,21 @@ Carregam sozinhas quando o assunto aparece — você não precisa chamar.
 - **Custo antes de gastar.** Nenhum recurso é proposto sem o preço em reais por mês.
 - **Conexão com o GitHub conferida antes do envio.** Quando o acesso expira, em vez
   de um erro em inglês, você recebe o passo para reconectar.
-- **Regras carregadas em toda sessão**, ajustadas ao perfil da conta.
-
 ---
 
-## Perfis
+## As regras vêm do servidor, e não daqui
 
-O tom muda conforme quem está do outro lado:
+Desde 15/09/2026 as regras da plataforma chegam pelo campo `instructions` do
+servidor MCP, e não mais por um hook deste plugin. Elas passaram a valer em
+**qualquer** cliente MCP — Claude Code, Codex, Cursor — sem instalar nada.
 
-- **guided** (padrão) — o Claude explica em linguagem simples, decide as questões
-  técnicas sozinho, faz em vez de mandar fazer, e fala de custo em reais por mês.
-- **technical** — só as regras da plataforma, sem a camada de condução.
+O mesmo vale para as skills e os templates: quem os entrega é a ferramenta
+`get_guide`.
 
-Para forçar em uma sessão: `BRIDGEAI_PROFILE=technical`. Para fixar na máquina,
-`~/.bridgeai/profile.json` com `{"profile": "technical"}`.
+⚠️ **Por isso este plugin não é mais necessário para usar a BridgeAI.** Ele
+continua funcionando e continua publicado; o caminho anunciado é só o servidor
+MCP. As ferramentas locais — o túnel, o registro de portas — estão em
+`npx bridgeai`, que não exige instalação.
 
 ---
 
@@ -116,17 +117,18 @@ Para forçar em uma sessão: `BRIDGEAI_PROFILE=technical`. Para fixar na máquin
 .claude-plugin/plugin.json   manifesto
 .mcp.json                    conexão com o MCP da BridgeAI (login por OAuth)
 hooks/hooks.json             início de sessão e proteções
-rules/platform.md            sempre carregado
-rules/guided.md              carregado só no perfil guided
 commands/                    os comandos acima
 skills/                      carregadas sob demanda
-scripts/                     login, túnel e hooks — Node sem dependências
+scripts/                     túnel, portas, login e hooks — Node sem dependências
+bin/bridgeai.js              o comando do `npx bridgeai`
+package.json                 o pacote npm com as ferramentas locais
 templates/publicar.yml       o workflow que publica o seu projeto
 ```
 
-O que fica em `rules/` é injetado em **toda** sessão e ocupa contexto que seria do
-código do usuário. Antes de acrescentar algo lá, pergunte se aquilo precisa valer
-desde a primeira mensagem. Se a resposta for "só quando o assunto aparecer", é skill.
+⚠️ **`rules/` não existe mais aqui.** As regras da plataforma moram no servidor
+MCP (`mcp/rules/`, servidas pelo `instructions`), e duplicá-las neste hook
+custaria ~23 mil tokens repetidos em toda conversa de quem tem o plugin.
+`scripts/hooks.test.js` afirma essa ausência.
 
 ## Licença
 

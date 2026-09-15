@@ -1,64 +1,35 @@
 #!/usr/bin/env node
-// Carrega as regras da plataforma no início de cada sessão.
+// O que ainda precisa ser MEDIDO nesta máquina no início de cada sessão.
 //
-// Mesma mecânica do guardrail: um CLAUDE.md na raiz de um plugin não vira
-// contexto do projeto, então o que precisa valer desde a primeira mensagem
-// entra por aqui, via `additionalContext` do hook SessionStart.
+// ## ⚠️ As regras da plataforma NÃO saem mais daqui — 15/09/2026
 //
-// A diferença é o perfil. O tom não é um plugin separado: é uma variável.
-//   - rules/platform.md  -> sempre
-//   - rules/guided.md    -> só quando o perfil é de quem não programa
+// Até hoje este hook carregava `rules/platform.md` e `rules/guided.md`. Elas
+// passaram para o campo `instructions` do servidor MCP (`mcp/src/platform-rules.ts`),
+// e as duas pastas foram removidas deste repositório.
 //
-// De onde vem o perfil, na ordem:
-//   1. BRIDGEAI_PROFILE no ambiente         (escape hatch, e o que o CI usa)
-//   2. ~/.bridgeai/profile.json             (gravado por /bridgeai:comecar,
-//                                            atualizado pelo MCP ao conectar)
-//   3. "guided"                             (padrão — errar para o lado de
-//                                            explicar demais é mais barato do
-//                                            que assumir que a pessoa sabe)
+// A razão não é arrumação: elas só existiam para quem instalasse o plugin — dois
+// comandos de chat, um marketplace do GitHub, e um reinício em toda versão do
+// Claude Code anterior à 2.1.221. Quem usa Codex, Cursor ou qualquer outro
+// cliente MCP não recebia regra nenhuma e passava a supor. Pelo `instructions`,
+// o mesmo texto chega em toda sessão de todo cliente conectado, sem instalar
+// nada.
 //
-// Regra de ouro herdada do guardrail: hook que derruba a sessão é pior que
-// hook nenhum. Qualquer falha aqui sai em silêncio.
-
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-
-const RULES = path.join(__dirname, '..', 'rules');
-const PROFILES = new Set(['guided', 'technical']);
-
-function readProfile() {
-  const fromEnv = (process.env.BRIDGEAI_PROFILE || '').trim().toLowerCase();
-  if (PROFILES.has(fromEnv)) return fromEnv;
-
-  try {
-    const file = path.join(os.homedir(), '.bridgeai', 'profile.json');
-    const { profile } = JSON.parse(fs.readFileSync(file, 'utf8'));
-    const normalized = String(profile || '').trim().toLowerCase();
-    if (PROFILES.has(normalized)) return normalized;
-  } catch {
-    // sem arquivo, ilegível ou com valor estranho: cai no padrão
-  }
-
-  return 'guided';
-}
-
-function read(name) {
-  try {
-    return fs.readFileSync(path.join(RULES, name), 'utf8').trim();
-  } catch {
-    return '';
-  }
-}
-
-// ⚠️ Aqui existia um aviso de "você ainda não entrou", disparado por
-// `BRIDGEAI_TOKEN` estar vazia. Ele saiu em 04/09/2026, junto com a variável:
-// quem entra pelo OAuth do Claude Code não tem variável de ambiente nenhuma, e o
-// aviso passaria a aparecer em TODA sessão de quem já está dentro — um aviso que
-// mente é pior que aviso nenhum.
+// ⚠️ **E por isso este arquivo não pode voltar a carregá-las**: o servidor já
+// as manda. Duas cópias seriam ~23 mil tokens repetidos em toda conversa de
+// quem tem o plugin — o dobro do custo por zero conteúdo novo. `hooks.test.js`
+// afirma essa ausência.
 //
-// Quem diz o que fazer é o `platform.md`, e ele diz pelo sinal certo: se as
-// ferramentas `mcp__bridgeai__*` não estiverem carregadas, o usuário não entrou.
+// ## O que sobrou, e por que ele não cabe no servidor
+//
+// As portas locais que ficaram de pé. Um servidor MCP roda em outro computador:
+// ele não tem como saber que o `npm run dev` da sessão passada continua vivo na
+// 3000, nem que um Postgres tomou a 55432 — e é justamente esse segundo caso
+// que faz a próxima migration ir para o banco errado, sem erro nenhum.
+//
+// Medir isso exige estar na máquina, e é a única coisa aqui que exige.
+//
+// Regra de ouro herdada do guardrail: hook que derruba a sessão é pior que hook
+// nenhum. Qualquer falha aqui sai em silêncio.
 
 /**
  * As portas locais que sobraram da sessão anterior.
@@ -82,19 +53,13 @@ async function portasAbertas() {
 }
 
 async function main() {
-  const parts = [read('platform.md')];
-  if (readProfile() === 'guided') parts.push(read('guided.md'));
-
-  const portas = await portasAbertas();
-  if (portas) parts.push(portas);
-
-  const text = parts.filter(Boolean).join('\n\n---\n\n');
-  if (!text) return;
+  const texto = await portasAbertas();
+  if (!texto) return;
 
   process.stdout.write(JSON.stringify({
     hookSpecificOutput: {
       hookEventName: 'SessionStart',
-      additionalContext: text,
+      additionalContext: texto,
     },
   }));
 }

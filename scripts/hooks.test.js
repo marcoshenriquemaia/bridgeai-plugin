@@ -146,20 +146,49 @@ test('check-push: entrada que não é objeto NÃO derruba o hook — e abre', ()
 // Claude Code não define variável de ambiente nenhuma, e o aviso passaria a
 // aparecer em TODA sessão de quem já está dentro.
 //
-// O teste afirma a AUSÊNCIA da frase antiga. Afirmar só que as regras carregam
-// deixaria a volta dela passar batida.
-test('load-platform: não inventa que o usuário está desconectado', () => {
+// E em 15/09/2026 saíram as REGRAS, que eram o corpo do que este hook emitia.
+// Elas passaram para o `instructions` do servidor MCP — ver o cabeçalho do
+// `load-platform.js`. O que sobrou é o que só a máquina sabe.
+function rodarLoadPlatform() {
   const r = spawnSync(process.execPath, [path.join(__dirname, 'load-platform.js')], {
     input: JSON.stringify({ hook_event_name: 'SessionStart' }),
     encoding: 'utf8',
     timeout: 15000,
     env: { ...process.env, BRIDGEAI_TOKEN: '' },
   });
+  assert.equal(r.status, 0, `o hook saiu com ${r.status}: ${r.stderr}`);
+  return r.stdout;
+}
 
-  assert.equal(r.status, 0);
-  const texto = JSON.parse(r.stdout).hookSpecificOutput.additionalContext;
+test('load-platform: NÃO carrega as regras — quem as manda é o servidor MCP', () => {
+  // Esta é a asserção que impede o custo de dobrar. As regras chegam pelo
+  // `instructions` do MCP em toda sessão; se este hook voltar a carregá-las,
+  // quem tem o plugin recebe ~23 mil tokens repetidos em toda conversa, sem
+  // uma linha de conteúdo nova e sem nada acusando.
+  const saida = rodarLoadPlatform();
+  assert.doesNotMatch(saida, /## O modelo/);
+  assert.doesNotMatch(saida, /As cinco regras/);
+  assert.doesNotMatch(saida, /Quem est[áa] do outro lado n[ãa]o programa/);
+});
 
-  assert.ok(texto.includes('BridgeAI'), 'as regras da plataforma não carregaram');
-  assert.doesNotMatch(texto, /ainda não está conectado/);
-  assert.doesNotMatch(texto, /BRIDGEAI_TOKEN/);
+test('load-platform: fica calado quando não há nada de pé nesta máquina', () => {
+  // Custo zero para quem começou a máquina limpa. Uma linha que aparece sempre
+  // é uma linha que se aprende a ignorar — e o que ela tem a dizer, quando tem,
+  // é que a próxima migration pode ir para o banco errado.
+  //
+  // ⚠️ Ele pode ter o que dizer se QUEM RODA A SUÍTE estiver com um servidor de
+  // pé, então o teste aceita as duas saídas e mede a forma de cada uma.
+  const saida = rodarLoadPlatform();
+
+  if (saida.trim() === '') return; // calado: o caso comum
+
+  const texto = JSON.parse(saida).hookSpecificOutput.additionalContext;
+  assert.ok(texto.length > 0, 'emitiu um bloco vazio em vez de ficar calado');
+  assert.match(texto, /porta/i, 'o que sobrou neste hook é o registro de portas');
+});
+
+test('load-platform: não inventa que o usuário está desconectado', () => {
+  const saida = rodarLoadPlatform();
+  assert.doesNotMatch(saida, /ainda não está conectado/);
+  assert.doesNotMatch(saida, /BRIDGEAI_TOKEN/);
 });

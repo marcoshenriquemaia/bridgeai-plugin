@@ -18,19 +18,27 @@ se dividem por **assunto**, nunca por senioridade do usuário:
 O tom **não é um terceiro plugin**: é uma variável lida do perfil da conta. Três das
 quatro preocupações não mudam com quem está do outro lado; só a condução muda.
 
-## Contexto é orçamento
+## ⚠️ As regras saíram daqui — 15/09/2026
 
-Tudo em `rules/` entra em toda sessão e some a cada compactação — é contexto que o
-usuário pagou e que deixa de estar disponível para o código dele. `platform.md`
-precisa ficar enxuto.
+`rules/platform.md` e `rules/guided.md` **não existem mais neste repositório**.
+Elas moram no servidor, em `mcp/rules/`, e chegam pelo campo `instructions` do
+MCP — em toda sessão de todo cliente conectado, sem instalar nada.
 
-Critério para decidir onde algo mora:
+O motivo é alcance: aqui elas só existiam para quem instalasse o plugin, num
+cliente só. Quem usa Codex ou Cursor não recebia regra nenhuma e passava a supor.
 
-- Precisa moldar **toda** interação, inclusive a primeira? → `rules/`
-- Responde a uma situação identificável? → `skills/`, que o Claude carrega ao
-  reconhecer a situação.
+**Não as traga de volta para este hook.** O servidor já as manda; duas cópias
+seriam ~23 mil tokens repetidos em toda conversa de quem tem o plugin, por zero
+conteúdo novo. `scripts/hooks.test.js` afirma a ausência.
 
-Fluxo de mobile, painel, domínio e deploy são skills justamente por isso.
+Contexto continua sendo orçamento, e o critério de onde algo mora continua o
+mesmo — só mudou o destino de cada resposta:
+
+- Precisa moldar **toda** interação, inclusive a primeira? → `mcp/rules/platform.md`
+- Responde a uma situação identificável? → `mcp/guides/`, que a ferramenta
+  `get_guide` entrega quando o assunto aparece.
+
+Fluxo de mobile, painel e deploy são guias justamente por isso.
 
 ## Hooks devolvem decisão, não bloqueiam
 
@@ -46,10 +54,13 @@ sessão é pior que hook nenhum.
 
 ## O contrato com o servidor
 
-Os nomes de ferramenta em [rules/platform.md](rules/platform.md) são o contrato
-que o MCP precisa cumprir. Ao renomear uma ferramenta no servidor, atualize aqui e no
-matcher de `hooks/hooks.json` — o matcher lista por nome as operações sem volta, e
-uma ferramenta destrutiva fora dessa lista passa sem aprovação.
+O contrato mora no servidor agora (`mcp/rules/platform.md`), e lá ele é
+**conferido por teste**: `platform-rules.test.ts` lê as ferramentas registradas e
+exige que cada uma seja anunciada.
+
+O que sobrou aqui e ainda é escrito à mão é o matcher de `hooks/hooks.json`: ele
+lista por nome as operações sem volta, e uma ferramenta destrutiva fora dessa
+lista passa sem aprovação. Ao acrescentar uma no servidor, acrescente no matcher.
 
 ⚠️ **O contrato foi escrito antes do servidor, e por um tempo mentiu.** A tabela
 anunciava 23 ferramentas quando existiam 10, e o Claude prometia ao usuário coisas
