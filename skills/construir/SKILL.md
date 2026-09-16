@@ -144,7 +144,7 @@ Depois disso, **delegue**: chame cada um pelo nome quando a tarefa for a dele.
 banco, cache e armazenamento ficam na nuvem, por um túnel. A ordem importa:
 
 1. `dev_credentials` — grava o `.env`, que já traz o acesso que o túnel usa.
-2. `npx bridgeai tunnel --dev`, em segundo plano.
+2. `npx bridgeaibrasil tunnel --dev`, em segundo plano.
 3. `npm install && npm run dev`.
 
 ⚠️ **O `.env` vem ANTES do túnel**, e não é preferência: o token do túnel nasce
@@ -163,14 +163,14 @@ Servidor e túnel continuam rodando depois que a conversa acaba. **Antes de subi
 qualquer um dos dois:**
 
 ```
-npx bridgeai portas
+npx bridgeaibrasil portas
 ```
 
 Ele mede as portas na hora e diz de qual projeto cada uma é. Anote o que **você**
 subir:
 
 ```
-npx bridgeai portas abrir --porta 3000 --o-que "servidor de desenvolvimento" --pid <pid>
+npx bridgeaibrasil portas abrir --porta 3000 --o-que "servidor de desenvolvimento" --pid <pid>
 ```
 
 Três regras, e as três já custaram tempo de alguém:

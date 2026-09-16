@@ -46,7 +46,7 @@ O túnel — que liga o seu `npm run dev` ao banco na nuvem, sem Docker — é u
 comando, e também não se instala:
 
 ```
-npx bridgeai tunnel --dev
+npx bridgeaibrasil tunnel --dev
 ```
 
 ---
@@ -125,7 +125,7 @@ O mesmo vale para as skills e os templates: quem os entrega é a ferramenta
 ⚠️ **Por isso este plugin não é mais necessário para usar a BridgeAI.** Ele
 continua funcionando e continua publicado; o caminho anunciado é só o servidor
 MCP. As ferramentas locais — o túnel, o registro de portas — estão em
-`npx bridgeai`, que não exige instalação.
+`npx bridgeaibrasil`, que não exige instalação.
 
 ---
 
@@ -138,7 +138,7 @@ hooks/hooks.json             início de sessão e proteções
 commands/                    os comandos acima
 skills/                      carregadas sob demanda
 scripts/                     túnel, portas, login e hooks — Node sem dependências
-bin/bridgeai.js              o comando do `npx bridgeai`
+bin/bridgeai.js              o comando do `npx bridgeaibrasil`
 package.json                 o pacote npm com as ferramentas locais
 templates/publicar.yml       o workflow que publica o seu projeto
 ```

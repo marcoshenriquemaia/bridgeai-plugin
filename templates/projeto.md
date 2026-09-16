@@ -43,11 +43,11 @@ O servidor roda aqui; banco, cache e armazenamento ficam na nuvem. **Ninguém
 instala Docker, Postgres nem Redis.** A ordem, e ela importa:
 
 1. `dev_credentials` grava o `.env` — ele já traz o acesso que o túnel usa.
-2. `npx bridgeai tunnel --dev`, em segundo plano.
+2. `npx bridgeaibrasil tunnel --dev`, em segundo plano.
 3. `npm install && npm run dev`.
 
 O `.env` **não vai para o Git**. E antes de subir servidor ou túnel, veja o que a
-sessão anterior deixou aberto: `npx bridgeai portas`.
+sessão anterior deixou aberto: `npx bridgeaibrasil portas`.
 
 ### O que o servidor recebe quando está publicado
 

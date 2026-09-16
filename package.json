@@ -1,9 +1,9 @@
 {
-  "name": "bridgeai",
+  "name": "bridgeaibrasil",
   "version": "0.1.0",
   "description": "As ferramentas locais da BridgeAI: o túnel que liga a sua máquina ao banco na nuvem, o registro de portas e o abridor de páginas. Sem dependência nenhuma.",
   "bin": {
-    "bridgeai": "bin/bridgeai.js"
+    "bridgeaibrasil": "bin/bridgeai.js"
   },
   "engines": {
     "node": ">=18"

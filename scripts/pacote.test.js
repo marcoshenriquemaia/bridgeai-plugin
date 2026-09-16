@@ -99,6 +99,38 @@ test('o binário declarado aponta para um arquivo que existe', () => {
   }
 });
 
+test('todo `npx` dos nossos verbos chama o pacote pelo nome publicado', () => {
+  // ⚠️ O nome nasceu `bridgeai` e o npm RECUSOU a publicação em 16/09/2026 —
+  // parecido demais com o `bridge-ai`, que já existe. O "404 no registro" que
+  // tinha sido conferido provava que o nome não era de ninguém, e não que ele
+  // podia ser de alguém. Virou `bridgeaibrasil`.
+  //
+  // O defeito que este teste pega não dá erro em lugar nenhum daqui: a
+  // mensagem de ajuda, o README e as skills diriam `npx <outro nome>`, e quem
+  // copiasse baixaria um pacote que não existe — ou, pior, o de outra pessoa.
+  const arquivos = [
+    path.join(RAIZ, 'bin', 'bridgeai.js'),
+    path.join(RAIZ, 'scripts', 'tunnel.js'),
+    path.join(RAIZ, 'README.md'),
+    path.join(RAIZ, 'skills', 'construir', 'SKILL.md'),
+    path.join(RAIZ, 'templates', 'projeto.md'),
+  ];
+  const chamados = [];
+  for (const arquivo of arquivos) {
+    const texto = fs.readFileSync(arquivo, 'utf8');
+    for (const m of texto.matchAll(/npx ([a-z@][\w@/.-]*) (tunnel|portas|abrir|login)\b/g)) {
+      chamados.push({ arquivo: path.basename(arquivo), nome: m[1] });
+    }
+  }
+
+  // Sem isto, uma regex que parasse de casar deixaria o laço abaixo vazio, e
+  // "nenhum nome errado" seria verdade sobre nada.
+  assert.ok(chamados.length >= 5, `Só achei ${chamados.length} chamadas de npx — a varredura parou de medir.`);
+  for (const { arquivo, nome } of chamados) {
+    assert.equal(nome, pkg.name, `${arquivo} manda rodar "npx ${nome}", e o pacote se chama "${pkg.name}".`);
+  }
+});
+
 test('o pacote continua sem dependência — é o que o faz baixar num segundo', () => {
   // Zero dependência também é segurança: é a mesma decisão do `agente/`, que
   // tem `dependencies: {}` porque toda biblioteca que ele carregasse seria uma
@@ -123,7 +155,7 @@ test('o túnel não manda mais rodar um script que só existe no plugin', () => 
   );
   assert.match(
     semAcesso,
-    /npx bridgeai login/,
+    /npx bridgeaibrasil login/,
     'A mensagem precisa dar um caminho que funcione sem plugin.',
   );
 });

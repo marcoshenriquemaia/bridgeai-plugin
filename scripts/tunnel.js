@@ -176,7 +176,7 @@ if (!token) {
       '\n' +
       'Rode o túnel de dentro da pasta do projeto — é de lá que ele lê o .env.\n' +
       '\n' +
-      'Sem agente à mão:  npx bridgeai login',
+      'Sem agente à mão:  npx bridgeaibrasil login',
   );
 }
 

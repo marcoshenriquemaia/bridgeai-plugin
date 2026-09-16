@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // As ferramentas locais da BridgeAI, num comando só.
 //
-//   npx bridgeai tunnel --dev        abre o túnel para o banco na nuvem
-//   npx bridgeai portas              o que ficou de pé nesta máquina
-//   npx bridgeai abrir <url>         abre uma página da plataforma
-//   npx bridgeai login               entra sem OAuth (cliente MCP antigo)
+//   npx bridgeaibrasil tunnel --dev        abre o túnel para o banco na nuvem
+//   npx bridgeaibrasil portas              o que ficou de pé nesta máquina
+//   npx bridgeaibrasil abrir <url>         abre uma página da plataforma
+//   npx bridgeaibrasil login               entra sem OAuth (cliente MCP antigo)
 //
 // ## Por que este arquivo existe
 //
@@ -35,11 +35,11 @@ const SCRIPTS = path.join(__dirname, '..', 'scripts');
 
 const AJUDA = `BridgeAI — as ferramentas locais.
 
-  npx bridgeai tunnel --dev          o túnel para o banco de desenvolvimento
-  npx bridgeai tunnel --app <id> --environment staging
-  npx bridgeai portas                o que ficou de pé nesta máquina
-  npx bridgeai abrir <url>           abre uma página da BridgeAI
-  npx bridgeai login                 entra sem OAuth (cliente MCP antigo)
+  npx bridgeaibrasil tunnel --dev          o túnel para o banco de desenvolvimento
+  npx bridgeaibrasil tunnel --app <id> --environment staging
+  npx bridgeaibrasil portas                o que ficou de pé nesta máquina
+  npx bridgeaibrasil abrir <url>           abre uma página da BridgeAI
+  npx bridgeaibrasil login                 entra sem OAuth (cliente MCP antigo)
 
 O túnel lê o acesso do .env do projeto, escrito pelo seu agente quando você
 pede as credenciais de desenvolvimento. Não há chave para copiar.
@@ -51,7 +51,7 @@ function main() {
 
   // ⚠️ O verbo é OBRIGATÓRIO, e um `--dev` solto não vira túnel por adivinhação.
   // O túnel é o comando mais provável, então a tentação é assumi-lo — e aí
-  // `npx bridgeai --help` abriria uma porta. Quem errou recebe o comando certo
+  // `npx bridgeaibrasil --help` abriria uma porta. Quem errou recebe o comando certo
   // escrito, que é o que ele vai copiar de qualquer jeito.
   if (!verbo || verbo === '--help' || verbo === '-h' || verbo === 'help') {
     console.log(AJUDA);
@@ -60,7 +60,7 @@ function main() {
 
   if (verbo.startsWith('-')) {
     console.error(
-      `Faltou dizer o que fazer.\n\nVocê quis dizer:  npx bridgeai tunnel ${process.argv.slice(2).join(' ')}\n\n${AJUDA}`,
+      `Faltou dizer o que fazer.\n\nVocê quis dizer:  npx bridgeaibrasil tunnel ${process.argv.slice(2).join(' ')}\n\n${AJUDA}`,
     );
     process.exit(1);
   }
