@@ -37,9 +37,10 @@ expira.
 | **Os itens** | Servidor, banco, cache e armazenamento, já normalizados pelo catálogo. São os argumentos do `create_app`, prontos na resposta |
 | **As letras** | O par de fontes que ele escolheu vendo. Carregue essas — e ⚠️ **não caia em Inter, Roboto ou na fonte do sistema**: elas são o marcador número um de tela gerada por IA, e ele escolheu outra coisa de propósito |
 | **O que o projeto guarda** | O esboço das entidades, nas palavras dele. É o vocabulário do projeto — use esses nomes, e confirme com ele antes da primeira migration |
-| **O que precisa estar seguro** | Sai dos riscos que ESTE projeto tem, e não é conselho genérico. É requisito, e entra na primeira lista |
-| **O que precisa de teste** | A lista de testes que este projeto precisa ter. Escreva-os enquanto constrói, e não "depois" |
-| **Os especialistas** | Os agentes a criar. Ver a seção abaixo |
+| **O jeito de construir** | Rápido, Equilibrado ou Robusto — a última pergunta da conversa, escolhida por ele vendo a troca. É o que decide se há especialista, quantos testes e se há revisão antes de publicar. Ver a seção abaixo |
+| **O que precisa estar seguro** | Sai dos riscos que ESTE projeto tem, e não é conselho genérico. É requisito, e entra na primeira lista — nos três modos |
+| **O que precisa de teste** | A lista de testes que este projeto precisa ter, no modo dele. Escreva-os enquanto constrói, e não "depois" |
+| **Os especialistas** | Os agentes a criar — nenhum, no Rápido. Ver a seção abaixo |
 
 O que o plano **não** decidiu, e você combina com ele: o **id do projeto** (curto,
 minúsculas e hífen — vira o endereço `<id>.bridgeaibrasil.com.br`) e o nome das
@@ -72,7 +73,8 @@ máquina.
 **4. Subir o ambiente de desenvolvimento** — a seção abaixo.
 
 **5. Criar os especialistas** que o plano indicou — a seção abaixo. Antes de
-construir, porque é para eles que você vai delegar enquanto constrói.
+construir, porque é para eles que você vai delegar enquanto constrói. **No modo
+Rápido não há nenhum**, e isso não é esquecimento.
 
 **6. Construir a primeira lista**, e só ela. A segurança e os testes do plano
 **fazem parte dela** — não são uma fase depois. Uma consulta sem filtro de dono
@@ -83,10 +85,36 @@ escrita hoje é a que ninguém acha em dezembro.
 deixe para o fim de tudo — um site no ar cedo é o que faz ele acreditar que o
 projeto existe.
 
+## O jeito de construir
+
+No fim da conversa ele escolheu **como** a IA dele vai construir. Quem não é
+técnico não enxerga valor em especialista e teste — enxerga que demora. Então ele
+escolheu sabendo a troca, e a sua parte é respeitar a escolha:
+
+| Modo | Especialistas | Testes | Antes de publicar |
+|---|---|---|---|
+| **Rápido** | nenhum | só os listados — o que não pode falhar | nada a mais |
+| **Equilibrado** | os listados, até dois | os listados e o caminho principal de cada parte | nada a mais |
+| **Robusto** | o time listado | a lista inteira e o caminho principal de cada parte | uma revisão de segurança do que mudou |
+
+⚠️ **No Rápido, não acrescente camada por conta própria.** Nada de criar agente,
+abrir revisão à parte ou escrever teste que o plano não pediu. As proteções da
+lista continuam valendo — elas vão nos três modos, porque são o que, faltando,
+vaza o dado de uma pessoa para outra ou perde dinheiro. Achou que o projeto pede
+mais? **Diga a ele e deixe ele decidir.**
+
+**Ele pode mudar de ideia.** Se disser "vamos fazer com mais cuidado" (ou "mais
+rápido"), chame `project_plan` de novo com `mode` — `fast`, `balanced` ou
+`thorough` — e a resposta volta com os especialistas e as proteções daquele modo.
+Na tela do plano ele também troca, com um clique.
+
+O tempo e o token dos modos são da assinatura de IA **dele**. O que a BridgeAI
+cobra por mês é o mesmo nos três — não diga o contrário.
+
 ## Os especialistas do projeto
 
-O plano indica quais agentes este projeto ganha — no máximo quatro, escolhidos
-pelo que ele É. Para cada um:
+O plano indica quais agentes este projeto ganha — nenhum no Rápido, e no máximo
+quatro no Robusto, escolhidos pelo que ele É. Para cada um:
 
 ```
 get_agent(agent_id: "revisor-de-seguranca")
