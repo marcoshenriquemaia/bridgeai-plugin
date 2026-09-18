@@ -45,8 +45,9 @@ não conhece o pico dele. Reduzir o servidor reinicia o app; a cota de disco, o
 cache menor e o armazenamento menor não reiniciam nada.
 
 **Ambiente parado é a linha mais fácil de esquecer.** Cada ambiente é um banco de
-dados próprio e custa cerca de R$ 39/mês. Homologação que ninguém abre há um mês
-é dinheiro correndo — **diga o valor**.
+dados próprio, com a linha dele na conta. Homologação que ninguém abre há um mês
+é dinheiro correndo — **diga o valor**, o que o `current_cost` mostra por
+recurso, e não um de cor.
 
 ⚠️ **O ambiente local NÃO é um deles.** Ele é da conta da pessoa, aparece uma vez
 só (na aba "Ambiente de dev" do painel) e serve todos os projetos

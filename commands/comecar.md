@@ -132,10 +132,11 @@ aqui** — publicar é a etapa 7. Diga isso na hora, para ele não abrir o ender
 achar que quebrou.
 
 **O ambiente local é do USUÁRIO, e não do projeto.** No primeiro projeto ele
-nasce junto e custa cerca de R$ 39/mês na conta dele; **do segundo projeto em
+nasce junto e é uma linha de banco na conta dele; **do segundo projeto em
 diante é de graça** — o mesmo ambiente serve todos. Diga isso quando ele criar o
 segundo: é a diferença entre achar que vai pagar de novo e criar quantos projetos
-quiser.
+quiser. Se ele perguntar quanto custa essa linha, diga o valor que a plataforma
+mostra — a aba "Ambiente de dev" do painel —, e não um de cor.
 
 ## Etapa 5 — Trazer para a máquina
 
@@ -225,8 +226,8 @@ com `kind: "database"` e `environment: "dev"`, o número na mesa, e
 
 **Diga o número que a ferramenta devolveu, e não um de cor.** Se ele já tem
 ambiente de desenvolvimento — porque tem outro projeto —, isso **não muda a conta
-dele**, e é isso que o `estimate_cost` responde. Se é o primeiro, custa cerca de
-R$ 39/mês, e aí é uma linha nova na conta.
+dele**, e é isso que o `estimate_cost` responde. Se é o primeiro, é uma linha
+nova na conta, e o valor é o que o `estimate_cost` devolveu.
 
 Se ele não quiser pagar por isso, **não invente um contorno**. Diga o que dá para
 fazer: escrever o código, publicar, e olhar o resultado no endereço do app.
