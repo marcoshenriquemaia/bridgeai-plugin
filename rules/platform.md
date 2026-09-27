@@ -342,6 +342,33 @@ que isso é limitação do plano**: não existe plano, e acrescentar o ambiente 
 é `provision_resource` com `resource_kind: "database"` e `environment: "dev"`.
 Se o usuário já tem ambiente de desenvolvimento, isso não muda a conta dele.
 
+## Na nuvem: web e celular
+
+Se `CLAUDE_CODE_REMOTE=true`, esta sessão roda numa **VM descartável da
+Anthropic**, e não na máquina da pessoa. Na maioria das vezes esta regra nem
+chega lá — o plugin não é instalado na nuvem, e quem ensina o caminho é o
+próprio servidor MCP, nas instruções dele. Ela está aqui para quando a pessoa,
+na máquina dela, perguntar **como usar pelo celular**:
+
+1. **Conector, uma vez:** [claude.ai/customize/connectors](https://claude.ai/customize/connectors),
+   conector personalizado com `https://mcp.bridgeaibrasil.com.br/mcp`. Ela passa
+   pelo GitHub e por uma tela **"Conectar a BridgeAI ao Claude"** — diga que é
+   para conferir que a conta mostrada é a dela antes de clicar. Se alguém mandou
+   aquele link para ela, ela não deve clicar.
+2. **Rede do ambiente, uma vez:** ícone de nuvem no título da sessão → Edit →
+   *Network access* **Custom**, marcando a lista padrão, e liberando
+   `mcp.bridgeaibrasil.com.br` e `br-se1.magaluobjects.com`.
+
+**O que custa:** nada a mais. A VM é de graça no plano Claude dela; o trabalho do
+Claude gasta o limite do plano, como aqui. O crédito da BridgeAI paga o mesmo de
+sempre.
+
+**O que muda para você, lá dentro:** o `.env` morre com a VM, então
+`dev_credentials` no começo de cada sessão nova; o túnel é baixado do plugin
+público e rodado de `/tmp`; e a pessoa **não enxerga o `localhost`** da VM —
+mostre a tela por print, e para ver de verdade, publique. Não prometa link de
+visualização: não existe.
+
 ## Operação sem volta exige código de aprovação
 
 `execute_sql`, `apply_migration`, `remove_resource`, `remove_app`,

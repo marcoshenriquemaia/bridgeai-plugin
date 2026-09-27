@@ -42,9 +42,35 @@ Se aparecer `Run /reload-plugins to activate`, digite `/reload-plugins`.
 /bridgeai:entrar
 ```
 
-Aparece um código de 8 letras, o navegador abre no GitHub, você confirma. O acesso
-fica guardado na sua máquina e **não aparece na tela**. Depois, **feche e abra o
-Claude Code** — é assim que ele passa a enxergar seus projetos.
+Ele pede para você digitar `/mcp`, escolher **bridgeai** e autenticar: o navegador
+abre no GitHub, você confirma, e pronto. O acesso fica guardado pelo próprio Claude
+Code e **não aparece na tela** — sem token para colar e sem reiniciar nada.
+
+### Pelo celular ou pela web (claude.ai/code)
+
+O Claude Code também roda **na nuvem**: você abre uma sessão pelo celular ou pelo
+navegador, e uma máquina da Anthropic faz o papel do seu computador — clona o
+projeto do GitHub, instala, roda. **A máquina não custa nada a mais**; o trabalho
+do Claude gasta o limite do seu plano, como sempre.
+
+O plugin não é instalado lá, então a BridgeAI entra por outro caminho:
+
+1. **Conecte a BridgeAI como conector**, uma vez, em
+   [claude.ai/customize/connectors](https://claude.ai/customize/connectors): conector
+   personalizado com o endereço `https://mcp.bridgeaibrasil.com.br/mcp`. O GitHub
+   pede para você autorizar, e a BridgeAI mostra uma tela **"Conectar a BridgeAI ao
+   Claude"** — confira que é a sua conta e clique em **Conectar**. Vale para web,
+   celular e desktop.
+2. **Libere dois domínios na rede do ambiente da nuvem** (ícone de nuvem no título da
+   sessão → Edit → *Network access* **Custom**, marcando a lista padrão):
+   `mcp.bridgeaibrasil.com.br` e `br-se1.magaluobjects.com`. Sem isso o banco de
+   desenvolvimento e os arquivos não chegam à máquina da nuvem.
+
+O resto o próprio servidor ensina ao Claude: montar o `.env`, baixar e abrir o túnel.
+
+⚠️ **O que a nuvem não tem:** o app rodando lá não abre no seu celular — o
+`localhost` é da máquina da Anthropic. O Claude mostra a tela por print; para ver de
+verdade, publique.
 
 ### Criar o primeiro projeto
 

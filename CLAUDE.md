@@ -127,6 +127,25 @@ O protocolo entre as duas pontas é testado em `mcp/src/tunnel.test.ts`, que
 reescreve este cliente em vez de importá-lo — se os dois divergirem, é lá que
 aparece.
 
+## Na nuvem, este plugin não chega
+
+Numa sessão do Claude Code na nuvem (web, celular), **plugin declarado no
+repositório não é instalado** — é o que a documentação da Anthropic diz. Então
+`rules/`, `skills/`, `commands/` e os hooks não existem lá. Quem ensina o caminho
+é o servidor, em `serverInstructions()` (`mcp/src/index.ts` do repositório da
+plataforma), e a BridgeAI entra como **conector do claude.ai**, não pelo
+`.mcp.json`.
+
+Duas consequências para quem mexe aqui:
+
+- **`scripts/tunnel.js` é baixado de `main`** por
+  `raw.githubusercontent.com/marcoshenriquemaia/bridgeai-plugin/main/scripts/tunnel.js`.
+  Mover ou renomear o arquivo quebra toda sessão na nuvem, sem erro do lado de
+  cá. E o que for empurrado para `main` roda na VM de todo cliente na hora.
+- **Nem todo 403 é da BridgeAI.** O porteiro de rede da nuvem recusa com
+  `x-deny-reason`, e o `conferir()` diz que foi a rede. `tunnel.test.js` nega a
+  frase antiga.
+
 ## O `.mcp.json` fica na raiz
 
 A documentação do Claude Code aceita dois lugares: um `.mcp.json` na **raiz do
@@ -143,4 +162,5 @@ instalação de verdade pelo marketplace, e ela depende do repositório público
   repositório da plataforma esta pasta é um submódulo: commit e push aqui
   primeiro, ponteiro lá depois.
 - Domínio próprio: no servidor desde 06/09/2026, e no `rules/platform.md`. Não virou skill — o que o Claude precisa saber cabe em dois parágrafos, e o passo que decide é no painel do registrador do usuário
-- Teste do `load-platform.js` e do `tunnel.js`, no formato do `hooks.test.js`
+- Teste do `load-platform.js`. O do `tunnel.js` existe desde 27/09/2026, e cobre
+  só a recusa no arranque — o fio com o servidor é testado no `mcp/src/tunnel.test.ts`

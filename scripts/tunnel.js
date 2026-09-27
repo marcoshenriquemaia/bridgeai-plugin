@@ -186,13 +186,34 @@ async function conferir(target = 'db') {
   }
   if (res.ok) return;
 
+  // ⚠️ Nem todo 403 é da BridgeAI. Numa sessão do Claude Code na NUVEM, a VM
+  // passa por um porteiro de rede com lista de domínios, e ele recusa com 403 e
+  // `x-deny-reason: host_not_allowed` — sem a BridgeAI ter sido alcançada. A
+  // frase antiga dizia "a BridgeAI respondeu 403", e mandava a pessoa procurar
+  // defeito no lugar que nem recebeu o pedido. Medido em 27/09/2026.
+  if (res.headers.get('x-deny-reason')) {
+    const host = new URL(base).hostname;
+    morre(
+      `A rede desta máquina bloqueou o endereço da BridgeAI (${host}) — o pedido nem chegou lá.\n` +
+        '\n' +
+        'Numa sessão do Claude Code na nuvem (web ou celular), libere na rede do ambiente:\n' +
+        'ícone de nuvem no título da sessão → Edit → Network access "Custom", marque a\n' +
+        `lista padrão e acrescente ${host} e br-se1.magaluobjects.com.\n` +
+        'Pode ser preciso abrir uma sessão nova depois.',
+    );
+  }
+
   let corpo = {};
   try {
     corpo = await res.json();
   } catch {
-    /* resposta sem JSON: cai na frase genérica abaixo */
+    /* resposta sem JSON: não foi a BridgeAI quem escreveu — ver abaixo */
   }
-  morre(corpo.error || `A BridgeAI respondeu ${res.status} e não deu para abrir o túnel.`);
+  morre(
+    corpo.error ||
+      `${new URL(base).hostname} respondeu ${res.status} sem a resposta da BridgeAI, e não deu para abrir o túnel.\n` +
+        'Pode ser uma rede, um proxy ou um firewall no caminho.',
+  );
 }
 
 /**
