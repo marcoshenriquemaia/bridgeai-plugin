@@ -67,10 +67,10 @@ Se ele ainda não tiver conta no GitHub, mande criar em https://github.com/signu
 é e-mail e senha, três minutos. A mesma conta serve de login da BridgeAI.
 
 **Depois, a BridgeAI** — só se as ferramentas `mcp__bridgeai__*` não estiverem
-carregadas. Siga o `/bridgeai:entrar`: o mesmo desenho, um código de 8 letras e o
-navegador abrindo no GitHub. O acesso é gravado no ambiente da máquina e **nunca
-aparece na tela** — não tente lê-lo. Terminou, peça para fechar e abrir o Claude
-Code e rodar este comando de novo. É a única interrupção do caminho, e é uma só.
+carregadas. Siga o `/bridgeai:entrar`: ele digita `/mcp`, escolhe **bridgeai** e
+autentica, e o navegador abre no GitHub. O acesso fica guardado pelo próprio Claude
+Code e **nunca aparece na tela** — não tente lê-lo. Não há reinício: chame
+`list_apps` e siga daqui.
 
 ## Etapa 3 — Ver a conta, e só então entender o projeto
 
