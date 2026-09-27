@@ -2,7 +2,7 @@
   "name": "bridgeai",
   "displayName": "BridgeAI",
   "description": "Conecta o Claude Code à plataforma BridgeAI: cria e enxerga a infraestrutura do projeto, mostra o custo antes de gastar e exige aprovação humana no que não tem volta. Em português.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Marcos Maia",
     "url": "https://github.com/marcoshenriquemaia"
