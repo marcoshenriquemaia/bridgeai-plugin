@@ -75,6 +75,10 @@ test('require-approval: move_app está na lista do hook, e sem pedido é negado'
   const matcher = hooks.hooks.PreToolUse.find((h) => h.matcher.includes('require-approval') || h.hooks.some((x) => x.command.includes('require-approval'))).matcher;
   assert.ok(new RegExp(matcher).test('mcp__bridgeai__move_app'), `move_app não está no matcher: ${matcher}`);
   assert.ok(new RegExp(matcher).test('mcp__bridgeai__remove_app'));
+  // Pausar tira o site do ar e retomar volta a cobrar (12/11/2026): as duas
+  // pedem o clique, e as duas passam por aqui.
+  assert.ok(new RegExp(matcher).test('mcp__bridgeai__pause_app'), `pause_app não está no matcher: ${matcher}`);
+  assert.ok(new RegExp(matcher).test('mcp__bridgeai__resume_app'), `resume_app não está no matcher: ${matcher}`);
 
   const r = roda('require-approval.js', chamada('mcp__bridgeai__move_app', { app: 'loja' }));
   assert.equal(r.exit, 0);

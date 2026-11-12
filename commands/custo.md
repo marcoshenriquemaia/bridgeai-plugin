@@ -27,7 +27,10 @@ depois os apps da conta pausam, nada é apagado, e recarregar religa. Sem drama,
 sem esconder.
 
 **O que dá para cortar.** Recurso provisionado e sem uso, ambiente que ninguém
-abre há semanas, tamanho maior do que o consumo real justifica. **Com o valor da
+abre há semanas, tamanho maior do que o consumo real justifica — e, para um
+projeto inteiro que vai ficar parado por um tempo, `pause_app`: o site sai do ar,
+nada é apagado, o servidor deixa de ser cobrado e o banco e o armazenamento
+continuam. **Com o valor da
 economia.** Se não houver nada a cortar, diga que está enxuto — é uma informação
 boa, não uma resposta vazia.
 
